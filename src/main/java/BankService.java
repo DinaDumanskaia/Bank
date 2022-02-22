@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BankService {
-    private final List<Integer> accountStatement = new ArrayList<>();
+    private final Map<String, List<Integer>> accountStatement = new HashMap<>();
     private List<String> bankClients = new ArrayList<>();
     private Map<String, Integer> clientsBalance = new HashMap<>();
 
@@ -15,29 +15,25 @@ public class BankService {
         return clientsBalance.get(clientsPhone);
     }
 
-    /**
-     * changing balance according passing value
-     * adding note to account statement
-     * @param value a value which changes the balance
-     * @throws Exception if balance become less than zero
-     */
     public void changeBalance(String clientsPhone, int value) throws Exception {
         int balance = clientsBalance.get(clientsPhone);
         clientsBalance.put(clientsPhone, (balance + value));
-        accountStatement.add(value);
+        List<Integer> listOfCurrentClientStatements = accountStatement.get(clientsPhone);
+        listOfCurrentClientStatements.add(value);
 
-        if (balance < 0) {
+        if (clientsBalance.get(clientsPhone) < 0) {
             throw new Exception("Your balance is less than zero");
         }
     }
 
     public List<Integer> getAccountStatement(String clientPhone) {
-        return accountStatement;
+        return accountStatement.get(clientPhone);
     }
 
     public void createNewClient(String phoneNumber) {
         bankClients.add(phoneNumber);
         clientsBalance.put(phoneNumber, 0);
+        accountStatement.put(phoneNumber, new ArrayList<>());
     }
 
     public boolean clientExists(String s) {

@@ -43,4 +43,9 @@ public class BankService {
     public boolean clientExists(String s) {
         return bankClients.contains(s);
     }
+
+    public void transferMoney(String sender, String recipient, int value) throws Exception {
+        changeBalance(sender, value * -1);
+        changeBalance(recipient, value);
+    }
 }

@@ -54,4 +54,33 @@ public class Tests {
         bankService.changeBalance("+7", 50);
         Assert.assertEquals(Arrays.asList(200, -100, 50), bankService.getAccountStatement("+7"));
     }
+
+    @Test
+    public void testWhenBalanceOf1stClientIncreasesBy100TheBalanceOfSecondIs0() throws Exception {
+        BankService bankService = new BankService();
+        bankService.createNewClient("+7");
+        bankService.createNewClient("+79");
+        bankService.changeBalance("+7",100);
+        Assert.assertEquals(0, bankService.getBalance("+79"));
+    }
+
+    @Test
+    public void testWhenBalanceOfFirstClIncrBy100FirstClTransfer30ToSecondClTheBalanceOfFirstIs70() throws Exception {
+        BankService bankService = new BankService();
+        bankService.createNewClient("+7");
+        bankService.createNewClient("+79");
+        bankService.changeBalance("+7",100);
+        bankService.transferMoney("+7", "+79", 30);
+        Assert.assertEquals(70, bankService.getBalance("+7"));
+    }
+
+    @Test
+    public void testWhenBalanceOfFirstClIncrBy100FirstClTransfer30ToSecondClTheBalanceOfSecondIs30() throws Exception {
+        BankService bankService = new BankService();
+        bankService.createNewClient("+7");
+        bankService.createNewClient("+79");
+        bankService.changeBalance("+7",100);
+        bankService.transferMoney("+7", "+79", 30);
+        Assert.assertEquals(30, bankService.getBalance("+79"));
+    }
 }

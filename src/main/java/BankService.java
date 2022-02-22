@@ -15,6 +15,12 @@ public class BankService {
         return clientsBalance.get(clientsPhone);
     }
 
+    /**
+     * changing balance according passing value
+     * adding note to account statement
+     * @param value a value which changes the balance
+     * @throws Exception if balance become less than zero
+     */
     public void changeBalance(String clientsPhone, int value) throws Exception {
         int balance = clientsBalance.get(clientsPhone);
         clientsBalance.put(clientsPhone, (balance + value));

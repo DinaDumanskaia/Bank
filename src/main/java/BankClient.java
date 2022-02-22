@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class BankClient {
+public class BankClient implements Account {
     private double balance;
     private final List<Double> accountStatement = new ArrayList<>();
 
@@ -29,5 +29,15 @@ public class BankClient {
 
     public List<Double> getAccountStatement() {
         return accountStatement;
+    }
+
+    @Override
+    public void setAccountCurrency(Currency currency) {
+
+    }
+
+    @Override
+    public Currency getAccountCurrency() {
+        return null;
     }
 }

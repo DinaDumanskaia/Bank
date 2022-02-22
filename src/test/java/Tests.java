@@ -1,18 +1,11 @@
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.matchers.JUnitMatchers;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 public class Tests {
-    @Test
-    public void testClientCreation() {
-        BankClient client = new BankClient();
-        assertNotNull(client);
-    }
-
     @Test
     public void testDefaultBalance() {
         BankClient client = new BankClient();
@@ -34,7 +27,7 @@ public class Tests {
         assertEquals(client.getBalance(), 80, 0.001);
     }
 
-    @Test (expected = Exception.class)
+    @Test(expected = Exception.class)
     public void testOverdraft() throws Exception {
         BankClient client = new BankClient();
         client.changeBalance(200);
@@ -47,6 +40,20 @@ public class Tests {
         client.changeBalance(200.0);
         client.changeBalance(-100.0);
         client.changeBalance(50.0);
-        Assert.assertThat(client.getAccountStatement(), CoreMatchers.hasItems(200.0, -100.0, 50.0));
+        Assert.assertEquals(Arrays.asList(200.0, -100.0, 50.0), client.getAccountStatement());
+    }
+
+    @Test
+    public void testNewClientCreated() {
+        BankClient client1 = new BankClient();
+        BankClient client2 = new BankClient();
+        Assert.assertNotEquals(client1, client2);
+    }
+
+    @Test
+    public void testAccountCurrency() {
+        BankClient client = new BankClient();
+        client.setAccountCurrency(null);
+        Assert.assertEquals(null, client.getAccountCurrency());
     }
 }

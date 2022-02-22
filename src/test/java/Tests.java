@@ -1,59 +1,59 @@
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
 public class Tests {
+
+    @Test
+    public void testCreateNewClient() {
+        BankService bankService = new BankService();
+        bankService.createNewClient("+7");
+        Assert.assertTrue(bankService.clientExists("+7"));
+    }
+
     @Test
     public void testDefaultBalance() {
-        BankClient client = new BankClient();
-        assertEquals(client.getBalance(), 0, 0.001);
+        BankService bankService = new BankService();
+        bankService.createNewClient("+7");
+        assertEquals(0, bankService.getBalance("+7"));
     }
 
     @Test
     public void testBalanceIncrement() throws Exception {
-        BankClient client = new BankClient();
-        client.changeBalance(100);
-        assertEquals(client.getBalance(), 100, 0.001);
+        BankService bankService = new BankService();
+        bankService.createNewClient("+7");
+        bankService.changeBalance("+7", 100);
+        Assert.assertEquals(bankService.getBalance("+7"), 100);
     }
 
     @Test
     public void testBalanceIncr100Decr20() throws Exception {
-        BankClient client = new BankClient();
-        client.changeBalance(100);
-        client.changeBalance(-20);
-        assertEquals(client.getBalance(), 80, 0.001);
+        BankService bankService = new BankService();
+        bankService.createNewClient("+7");
+        bankService.changeBalance("+7",100);
+        bankService.changeBalance("+7", -20);
+        assertEquals(bankService.getBalance("+7"), 80, 0.001);
     }
 
     @Test(expected = Exception.class)
     public void testOverdraft() throws Exception {
-        BankClient client = new BankClient();
-        client.changeBalance(200);
-        client.changeBalance(-300);
+        BankService client = new BankService();
+        client.changeBalance("+7", 200);
+        client.changeBalance("+7", -300);
     }
 
     @Test
     public void testAccountStatement() throws Exception {
-        BankClient client = new BankClient();
-        client.changeBalance(200.0);
-        client.changeBalance(-100.0);
-        client.changeBalance(50.0);
-        Assert.assertEquals(Arrays.asList(200.0, -100.0, 50.0), client.getAccountStatement());
-    }
-
-    @Test
-    public void testNewClientCreated() {
-        BankClient client1 = new BankClient();
-        BankClient client2 = new BankClient();
-        Assert.assertNotEquals(client1, client2);
-    }
-
-    @Test
-    public void testAccountCurrency() {
-        BankClient client = new BankClient();
-        client.setAccountCurrency(null);
-        Assert.assertEquals(null, client.getAccountCurrency());
+        BankService bankService = new BankService();
+        bankService.createNewClient("+7");
+        bankService.changeBalance("+7", 200);
+        bankService.changeBalance("+7", -100);
+        bankService.changeBalance("+7", 50);
+        Assert.assertEquals(Arrays.asList(200, -100, 50), bankService.getAccountStatement("+7"));
     }
 }

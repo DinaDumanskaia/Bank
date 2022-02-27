@@ -3,7 +3,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -19,6 +22,43 @@ public class Tests {
     @After
     public void cleanUp() {
         bankService = null;
+    }
+
+    @Test
+    //разные валюты:
+    //клиент может пополнять/снимать со счета деньги в разных валютах
+    public void testChangeBalanceInDifferentCurrencies() throws Exception {
+        //кладу на счет сумму в рублях, долларах и евро
+        //проверяю, что существует сумма в рублях, долларах и евро
+        int rubleBalance = 100;
+        bankService.changeBalance("+7", rubleBalance, Currency.RUB);
+//        bankService.changeBalance("+7", 50, USD);
+//        bankService.changeBalance("+7", 30, EUR);
+
+        Assert.assertEquals(rubleBalance, bankService.getBalance("+7", Currency.RUB));
+    }
+
+    @Test
+    public void testTransactionDate() throws Exception {
+        bankService.changeBalance("+7", 50);
+        List<TransactionData> listOfTransactions = bankService.getAccountStatement("+7");
+        TransactionData lastTransaction = listOfTransactions.get(listOfTransactions.size() - 1);
+        Date date = lastTransaction.getDate();
+        Assert.assertNotNull(date);
+    }
+
+
+    @Test
+    public void testCreateThreeClients() throws Exception {
+        bankService.createNewClient("+8");
+        bankService.createNewClient("+9");
+        bankService.createNewClient("+1");
+        bankService.changeBalance("+8", 8);
+        bankService.changeBalance("+9", 9);
+        bankService.changeBalance("+1", 1);
+        Assert.assertNotEquals(bankService.getBalance("+8"), bankService.getBalance("+9"));
+        Assert.assertNotEquals(bankService.getBalance("+8"), bankService.getBalance("+1"));
+        Assert.assertNotEquals(bankService.getBalance("+1"), bankService.getBalance("+9"));
     }
 
     @Test
@@ -55,7 +95,16 @@ public class Tests {
         bankService.changeBalance("+7", 200);
         bankService.changeBalance("+7", -100);
         bankService.changeBalance("+7", 50);
-        Assert.assertEquals(Arrays.asList(200, -100, 50), bankService.getAccountStatement("+7"));
+        List<Integer> transactionValues = getTransactionValues(bankService.getAccountStatement("+7"));
+        Assert.assertEquals(Arrays.asList(200, -100, 50), transactionValues);
+    }
+
+    private List<Integer> getTransactionValues(List<TransactionData> accountStatement) {
+        List<Integer> values = new ArrayList<>();
+        for (TransactionData transactionData : accountStatement) {
+            values.add(transactionData.getValue());
+        }
+        return values;
     }
 
     @Test
@@ -65,7 +114,8 @@ public class Tests {
         bankService.changeBalance("+79", 200);
         bankService.changeBalance("+79", 30);
 
-        Assert.assertEquals(Arrays.asList(100, -50), bankService.getAccountStatement("+7"));
+        List<Integer> transactionValues = getTransactionValues(bankService.getAccountStatement("+7"));
+        Assert.assertEquals(Arrays.asList(100, -50), transactionValues);
     }
 
     @Test

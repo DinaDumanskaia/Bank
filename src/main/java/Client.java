@@ -1,10 +1,11 @@
 public class Client {
 
     private final String phoneNumber;
-    private final BalancesBox clientBalance = new BalancesBox();
+    private final BalancesBox clientBalance;
 
-    public Client(String phoneNumber) {
+    public Client(String phoneNumber, DateProvider dateProvider) {
         this.phoneNumber = phoneNumber;
+        clientBalance = new BalancesBox(dateProvider);
     }
 
     public int getBalance(Currency currency) {

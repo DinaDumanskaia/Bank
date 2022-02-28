@@ -1,8 +1,13 @@
 import java.util.*;
 
 public class BalancesBox {
+    private final DateProvider dateProvider;
     private final List<TransactionData> transactionList = new ArrayList<>();
     private final Map<Currency, Integer> allBalances = new HashMap<>();
+
+    public BalancesBox(DateProvider dateProvider) {
+        this.dateProvider = dateProvider;
+    }
 
     public int getBalanceByCurrency(Currency currency) {
         return allBalances.computeIfAbsent(currency, k -> 0);
@@ -25,7 +30,7 @@ public class BalancesBox {
             throw new Exception("Your balance in " + currency.name() + " is less than zero");
         } else {
             allBalances.put(currency, balanceValue);
-            transactionList.add(new TransactionData(value, new Date(), currency));
+            transactionList.add(new TransactionData(value, dateProvider.getDate(), currency));
         }
     }
 

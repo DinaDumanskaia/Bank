@@ -4,12 +4,14 @@ import java.util.List;
 public class BankService {
 
     private final List<Client> bankClients = new ArrayList<>();
+    private final DateProvider dateProvider;
 
-    public BankService() {
+    public BankService(DateProvider dateProvider) {
+        this.dateProvider = dateProvider;
     }
 
     public void createNewClient(String phoneNumber) {
-        Client client = new Client(phoneNumber);
+        Client client = new Client(phoneNumber, dateProvider);
         bankClients.add(client);
     }
 

@@ -12,10 +12,9 @@ import static org.junit.Assert.assertEquals;
 
 public class Tests {
     private BankService bankService;
-
     @Before
     public void init() {
-        bankService = new BankService();
+        bankService = new BankService(new MockDateProviderImpl());
         bankService.createNewClient("+7");
         bankService.createNewClient("+79");
     }
@@ -54,7 +53,7 @@ public class Tests {
         List<TransactionData> listOfTransactions = bankService.getClientByPhone("+7").getClientBalances().getTransactionList();
         TransactionData lastTransaction = listOfTransactions.get(listOfTransactions.size() - 1);
         Date date = lastTransaction.getDate();
-        Assert.assertNotNull(date);
+        Assert.assertEquals(MockDateProviderImpl.DATE, date);
     }
 
     @Test

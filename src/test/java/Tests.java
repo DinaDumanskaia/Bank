@@ -25,40 +25,36 @@ public class Tests {
     }
 
     @Test
-    //разные валюты:
-    //клиент может пополнять/снимать со счета деньги в разных валютах
-    public void testChangeBalanceInDifferentCurrencies() throws Exception {
-        //кладу на счет сумму в рублях, долларах и евро
-        //проверяю, что существует сумма в рублях, долларах и евро
+    public void testChangeBalanceInRUB() throws Exception {
         int rubleBalance = 100;
-        bankService.changeBalance("+7", rubleBalance, Currency.RUB);
-//        bankService.changeBalance("+7", 50, USD);
-//        bankService.changeBalance("+7", 30, EUR);
+        bankService.getClientByPhone("+7").getClientBalances().changeBalance(rubleBalance, Currency.RUB);
 
-        Assert.assertEquals(rubleBalance, bankService.getBalance("+7", Currency.RUB));
+        Assert.assertEquals(rubleBalance, bankService.getClientByPhone("+7").getClientBalances().getBalanceByCurrency(Currency.RUB));
+    }
+
+    @Test
+    public void testChangeBalanceInUSD() throws Exception {
+        int usdBalance = 70;
+        bankService.getClientByPhone("+7").getClientBalances().changeBalance(usdBalance, Currency.USD);
+
+        Assert.assertEquals(usdBalance, bankService.getClientByPhone("+7").getClientBalances().getBalanceByCurrency(Currency.USD));
+    }
+
+    @Test
+    public void testChangeBalanceInEUR() throws Exception {
+        int euroBalance = 50;
+        bankService.getClientByPhone("+7").getClientBalances().changeBalance(euroBalance, Currency.EUR);
+
+        Assert.assertEquals(euroBalance, bankService.getClientByPhone("+7").getClientBalances().getBalanceByCurrency(Currency.EUR));
     }
 
     @Test
     public void testTransactionDate() throws Exception {
-        bankService.changeBalance("+7", 50);
-        List<TransactionData> listOfTransactions = bankService.getAccountStatement("+7");
+        bankService.getClientByPhone("+7").getClientBalances().changeBalance(50);
+        List<TransactionData> listOfTransactions = bankService.getClientByPhone("+7").getClientBalances().getTransactionList();
         TransactionData lastTransaction = listOfTransactions.get(listOfTransactions.size() - 1);
         Date date = lastTransaction.getDate();
         Assert.assertNotNull(date);
-    }
-
-
-    @Test
-    public void testCreateThreeClients() throws Exception {
-        bankService.createNewClient("+8");
-        bankService.createNewClient("+9");
-        bankService.createNewClient("+1");
-        bankService.changeBalance("+8", 8);
-        bankService.changeBalance("+9", 9);
-        bankService.changeBalance("+1", 1);
-        Assert.assertNotEquals(bankService.getBalance("+8"), bankService.getBalance("+9"));
-        Assert.assertNotEquals(bankService.getBalance("+8"), bankService.getBalance("+1"));
-        Assert.assertNotEquals(bankService.getBalance("+1"), bankService.getBalance("+9"));
     }
 
     @Test
@@ -68,34 +64,34 @@ public class Tests {
 
     @Test
     public void testDefaultBalance() {
-        assertEquals(0, bankService.getBalance("+7"));
+        assertEquals(0, bankService.getClientByPhone("+7").getBalance());
     }
 
     @Test
     public void testBalanceIncrement() throws Exception {
-        bankService.changeBalance("+7", 100);
-        Assert.assertEquals(bankService.getBalance("+7"), 100);
+        bankService.getClientByPhone("+7").getClientBalances().changeBalance(100);
+        Assert.assertEquals(100, bankService.getClientByPhone("+7").getBalance());
     }
 
     @Test
     public void testBalanceIncr100Decr20() throws Exception {
-        bankService.changeBalance("+7",100);
-        bankService.changeBalance("+7", -20);
-        assertEquals(bankService.getBalance("+7"), 80, 0.001);
+        bankService.getClientByPhone("+7").getClientBalances().changeBalance(100);
+        bankService.getClientByPhone("+7").getClientBalances().changeBalance(-20);
+        assertEquals(80, bankService.getClientByPhone("+7").getClientBalances().getBalance());
     }
 
     @Test(expected = Exception.class)
     public void testOverdraft() throws Exception {
-        bankService.changeBalance("+7", 200);
-        bankService.changeBalance("+7", -300);
+        bankService.getClientByPhone("+7").getClientBalances().changeBalance(200);
+        bankService.getClientByPhone("+7").getClientBalances().changeBalance(-300);
     }
 
     @Test
     public void testAccountStatement() throws Exception {
-        bankService.changeBalance("+7", 200);
-        bankService.changeBalance("+7", -100);
-        bankService.changeBalance("+7", 50);
-        List<Integer> transactionValues = getTransactionValues(bankService.getAccountStatement("+7"));
+        bankService.getClientByPhone("+7").getClientBalances().changeBalance(200);
+        bankService.getClientByPhone("+7").getClientBalances().changeBalance(-100);
+        bankService.getClientByPhone("+7").getClientBalances().changeBalance(50);
+        List<Integer> transactionValues = getTransactionValues(bankService.getClientByPhone("+7").getClientBalances().getTransactionList());
         Assert.assertEquals(Arrays.asList(200, -100, 50), transactionValues);
     }
 
@@ -109,32 +105,32 @@ public class Tests {
 
     @Test
     public void testAccountStatement2() throws Exception {
-        bankService.changeBalance("+7", 100);
-        bankService.changeBalance("+7", -50);
-        bankService.changeBalance("+79", 200);
-        bankService.changeBalance("+79", 30);
+        bankService.getClientByPhone("+7").getClientBalances().changeBalance(100);
+        bankService.getClientByPhone("+7").getClientBalances().changeBalance(-50);
+        bankService.getClientByPhone("+79").getClientBalances().changeBalance(200);
+        bankService.getClientByPhone("+79").getClientBalances().changeBalance(30);
 
-        List<Integer> transactionValues = getTransactionValues(bankService.getAccountStatement("+7"));
+        List<Integer> transactionValues = getTransactionValues(bankService.getClientByPhone("+7").getClientBalances().getTransactionList());
         Assert.assertEquals(Arrays.asList(100, -50), transactionValues);
     }
 
     @Test
     public void testWhenBalanceOf1stClientIncreasesBy100TheBalanceOfSecondIs0() throws Exception {
-        bankService.changeBalance("+7",100);
-        Assert.assertEquals(0, bankService.getBalance("+79"));
+        bankService.getClientByPhone("+7").getClientBalances().changeBalance(100);
+        Assert.assertEquals(0, bankService.getClientByPhone("+79").getBalance());
     }
 
     @Test
-    public void testWhenBalanceOfFirstClIncrBy100FirstClTransfer30ToSecondClTheBalanceOfFirstIs70() throws Exception {
-        bankService.changeBalance("+7",100);
+    public void testFirstClientBalanceAfterTransferringMoney() throws Exception {
+        bankService.getClientByPhone("+7").getClientBalances().changeBalance(100);
         bankService.transferMoney("+7", "+79", 30);
-        Assert.assertEquals(70, bankService.getBalance("+7"));
+        Assert.assertEquals(70, bankService.getClientByPhone("+7").getBalance());
     }
 
     @Test
-    public void testWhenBalanceOfFirstClIncrBy100FirstClTransfer30ToSecondClTheBalanceOfSecondIs30() throws Exception {
-        bankService.changeBalance("+7",100);
+    public void testSecondClientBalanceAfterReceivingMoney() throws Exception {
+        bankService.getClientByPhone("+7").getClientBalances().changeBalance(100);
         bankService.transferMoney("+7", "+79", 30);
-        Assert.assertEquals(30, bankService.getBalance("+79"));
+        Assert.assertEquals(30, bankService.getClientByPhone("+79").getBalance());
     }
 }

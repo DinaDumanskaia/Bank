@@ -5,12 +5,9 @@ public class TransactionData {
     private final int value;
     private final Date date;
 
-    private final Currency currency;
-
-    public TransactionData(int value, Date date, Currency currency) {
+    public TransactionData(int value, Date date) {
         this.value = value;
         this.date = date;
-        this.currency = currency;
     }
 
     public Date getDate() {
@@ -19,9 +16,5 @@ public class TransactionData {
 
     public int getValue() {
         return value;
-    }
-
-    public Currency getCurrency() {
-        return currency;
     }
 }

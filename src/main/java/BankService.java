@@ -25,14 +25,21 @@ public class BankService {
     }
 
     public void transferMoney(String sender, String recipient, int value, Currency currency) throws Exception {
+        checkTransferAbility(sender, recipient);
+        makeTransfer(sender, recipient, value, currency);
+    }
+
+    private void checkTransferAbility(String sender, String recipient) throws Exception {
         if (!clientExists(sender) || !clientExists(recipient)) {
             throw new Exception("Client not found.");
-        } else {
-            Client clientFrom = getClientByPhone(sender);
-            Client clientTo = getClientByPhone(recipient);
-            clientFrom.getClientBalances().changeBalance(value * -1, currency);
-            clientTo.getClientBalances().changeBalance(value, currency);
         }
+    }
+
+    private void makeTransfer(String sender, String recipient, int value, Currency currency) throws Exception {
+        Client clientFrom = getClientByPhone(sender);
+        Client clientTo = getClientByPhone(recipient);
+        clientFrom.changeBalance(-1 * value, currency);
+        clientTo.changeBalance(value, currency);
     }
 
     public Client getClientByPhone(String phone) {

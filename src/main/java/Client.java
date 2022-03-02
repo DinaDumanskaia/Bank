@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Client {
@@ -6,14 +7,14 @@ public class Client {
     private final Map<Currency, MoneyAccount> moneyAccounts = new HashMap<>();
     private final DateProvider dateProvider;
 
-    protected MoneyAccount getMoneyAccount(Currency currency) {
+    private MoneyAccount getMoneyAccount(Currency currency) {
         if (moneyAccounts.get(currency) == null) {
             moneyAccounts.put(currency, new MoneyAccount(dateProvider));
         }
         return moneyAccounts.get(currency);
     }
 
-    protected MoneyAccount getMoneyAccount() {
+    private MoneyAccount getMoneyAccount() {
         return getMoneyAccount(Currency.RUB);
     }
 
@@ -28,6 +29,18 @@ public class Client {
 
     void changeBalance(int value, Currency currency) throws Exception {
         getMoneyAccount(currency).changeBalance(value);
+    }
+
+    public void changeMoneyAccountBalance(Currency currency, int value) throws Exception {
+        getMoneyAccount(currency).changeBalance(value);
+    }
+
+    public int getMoneyAccountBalance(Currency currency) {
+        return getMoneyAccount(currency).getBalance();
+    }
+
+    public List<TransactionData> getMoneyAccountTransactionList() {
+        return getMoneyAccount().getTransactionList();
     }
 }
 

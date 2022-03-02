@@ -50,7 +50,7 @@ public class BankService {
     }
 
     public void changeBalance(String phone, Currency currency, int value) throws Exception {
-        getClientByPhone(phone).getMoneyAccount(currency).changeBalance(value);
+        getClientByPhone(phone).changeMoneyAccountBalance(currency, value);
     }
 
     public void changeBalance(String phone, int value) throws Exception {
@@ -58,7 +58,7 @@ public class BankService {
     }
 
     public int getBalance(String phone, Currency currency) {
-        return getClientByPhone(phone).getMoneyAccount(currency).getBalance();
+        return getClientByPhone(phone).getMoneyAccountBalance(currency);
     }
 
     public int getBalance(String phone) {
@@ -66,7 +66,7 @@ public class BankService {
     }
 
     public List<TransactionData> getTransactions(String phone) {
-        return makeCopy(getClientByPhone(phone).getMoneyAccount().getTransactionList());
+        return makeCopy(getClientByPhone(phone).getMoneyAccountTransactionList());
     }
 
     private List<TransactionData> makeCopy(List<TransactionData> transactionList) {

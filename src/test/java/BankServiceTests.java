@@ -30,8 +30,8 @@ public class BankServiceTests {
     public void testChangeBalanceInUSD() throws Exception {
         int usdBalance = 70;
         bankService.changeBalance("+7", Currency.USD, usdBalance);
-        Assert.assertEquals(usdBalance, bankService.getBalance("+7", Currency.USD));
 
+        Assert.assertEquals(usdBalance, bankService.getBalance("+7", Currency.USD));
     }
 
     @Test
@@ -43,11 +43,25 @@ public class BankServiceTests {
     }
 
     @Test
+    public void testGetTransactionsReturnACopy() throws Exception {
+        bankService.changeBalance("+7", 50);
+        bankService.changeBalance("+7", 100);
+
+        List<TransactionData> listOfTransactions = bankService.getTransactions("+7");
+        listOfTransactions.clear();
+
+        Assert.assertEquals(0, listOfTransactions.size());
+        Assert.assertEquals(2, bankService.getTransactions("+7").size());
+    }
+
+    @Test
     public void testTransactionDate() throws Exception {
         bankService.changeBalance("+7", 50);
+
         List<TransactionData> listOfTransactions = bankService.getTransactions("+7");
         TransactionData lastTransaction = listOfTransactions.get(listOfTransactions.size() - 1);
         Date date = lastTransaction.getDate();
+
         Assert.assertEquals(MockDateProviderImpl.DATE, date);
     }
 
@@ -64,13 +78,15 @@ public class BankServiceTests {
     @Test
     public void testBalanceIncrement() throws Exception {
         bankService.changeBalance("+7", 100);
+
         Assert.assertEquals(100, bankService.getBalance("+7"));
     }
 
     @Test
     public void testBalanceIncr100Decr20() throws Exception {
         bankService.changeBalance("+7", 100);
-        bankService.getClientByPhone("+7").getMoneyAccount().changeBalance(-20);
+        bankService.changeBalance("+7", -20);
+
         assertEquals(80, bankService.getBalance("+7"));
     }
 
@@ -85,7 +101,9 @@ public class BankServiceTests {
         bankService.changeBalance("+7", 200);
         bankService.changeBalance("+7", -100);
         bankService.changeBalance("+7", 50);
+
         List<Integer> transactionValues = getTransactionValues(bankService.getTransactions("+7"));
+
         Assert.assertEquals(Arrays.asList(200, -100, 50), transactionValues);
     }
 
@@ -105,6 +123,7 @@ public class BankServiceTests {
         bankService.changeBalance("+79", 30);
 
         List<Integer> transactionValues = getTransactionValues(bankService.getTransactions("+7"));
+
         Assert.assertEquals(Arrays.asList(100, -50), transactionValues);
     }
 
@@ -118,6 +137,7 @@ public class BankServiceTests {
     public void testFirstClientBalanceAfterTransferringMoney() throws Exception {
         bankService.changeBalance("+7", 100);
         bankService.transferMoney("+7", "+79", 30);
+
         Assert.assertEquals(70, bankService.getBalance("+7"));
     }
 
@@ -125,6 +145,7 @@ public class BankServiceTests {
     public void testSecondClientBalanceAfterReceivingMoney() throws Exception {
         bankService.changeBalance("+7", 100);
         bankService.transferMoney("+7", "+79", 30);
+
         Assert.assertEquals(30, bankService.getBalance("+79"));
     }
 }

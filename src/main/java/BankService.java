@@ -42,7 +42,7 @@ public class BankService {
         clientTo.changeBalance(value, currency);
     }
 
-    public Client getClientByPhone(String phone) {
+    private Client getClientByPhone(String phone) {
         return bankClients.stream()
                 .filter(client -> client.getPhone().equals(phone))
                 .findFirst()
@@ -66,6 +66,14 @@ public class BankService {
     }
 
     public List<TransactionData> getTransactions(String phone) {
-        return getClientByPhone("+7").getMoneyAccount().getTransactionList();
+        return makeCopy(getClientByPhone(phone).getMoneyAccount().getTransactionList());
+    }
+
+    private List<TransactionData> makeCopy(List<TransactionData> transactionList) {
+        List<TransactionData> list = new ArrayList<>();
+        for (TransactionData transactionData : transactionList) {
+            list.add(transactionData.copy());
+        }
+        return list;
     }
 }

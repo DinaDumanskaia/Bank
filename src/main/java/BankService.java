@@ -46,6 +46,26 @@ public class BankService {
         return bankClients.stream()
                 .filter(client -> client.getPhone().equals(phone))
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new RuntimeException("Client not found"));
+    }
+
+    public void changeBalance(String phone, Currency currency, int value) throws Exception {
+        getClientByPhone(phone).getMoneyAccount(currency).changeBalance(value);
+    }
+
+    public void changeBalance(String phone, int value) throws Exception {
+        changeBalance(phone, Currency.RUB, value);
+    }
+
+    public int getBalance(String phone, Currency currency) {
+        return getClientByPhone(phone).getMoneyAccount(currency).getBalance();
+    }
+
+    public int getBalance(String phone) {
+        return getBalance(phone, Currency.RUB);
+    }
+
+    public List<TransactionData> getTransactions(String phone) {
+        return getClientByPhone("+7").getMoneyAccount().getTransactionList();
     }
 }

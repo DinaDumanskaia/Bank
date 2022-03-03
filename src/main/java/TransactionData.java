@@ -18,7 +18,7 @@ public class TransactionData {
         return value;
     }
 
-    public TransactionData copy() {
+    TransactionData copy() {
         return new TransactionData(value, date);
     }
 }

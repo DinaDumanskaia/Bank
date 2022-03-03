@@ -1,6 +1,7 @@
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Client {
     private final String phoneNumber;
@@ -39,8 +40,8 @@ public class Client {
         return getMoneyAccount(currency).getBalance();
     }
 
-    public List<TransactionData> getMoneyAccountTransactionList() {
-        return getMoneyAccount().getTransactionList();
+    public List<TransactionData> getListOfTransactions() {
+        return getMoneyAccount().getMoneyAccountTransactionList();
     }
 }
 

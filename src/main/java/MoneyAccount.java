@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MoneyAccount {
     private final DateProvider dateProvider;
@@ -29,7 +30,12 @@ public class MoneyAccount {
         return (getBalance() + value) >= 0;
     }
 
-    public List<TransactionData> getTransactionList() {
-        return transactions;
+    public List<TransactionData> getMoneyAccountTransactionList() {
+        return makeCopy(transactions);
     }
+
+    private List<TransactionData> makeCopy(List<TransactionData> transactions) {
+        return transactions.stream().map(TransactionData::copy).collect(Collectors.toList());
+    }
+
 }

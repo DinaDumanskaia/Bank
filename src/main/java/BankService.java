@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BankService {
 
@@ -66,14 +67,6 @@ public class BankService {
     }
 
     public List<TransactionData> getTransactions(String phone) {
-        return makeCopy(getClientByPhone(phone).getMoneyAccountTransactionList());
-    }
-
-    private List<TransactionData> makeCopy(List<TransactionData> transactionList) {
-        List<TransactionData> list = new ArrayList<>();
-        for (TransactionData transactionData : transactionList) {
-            list.add(transactionData.copy());
-        }
-        return list;
+        return getClientByPhone(phone).getListOfTransactions();
     }
 }

@@ -1,6 +1,7 @@
+package bank;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class BankService {
 
@@ -32,7 +33,7 @@ public class BankService {
 
     private void checkTransferAbility(String sender, String recipient) throws Exception {
         if (!clientExists(sender) || !clientExists(recipient)) {
-            throw new Exception("Client not found.");
+            throw new Exception("bank.Client not found.");
         }
     }
 
@@ -47,7 +48,7 @@ public class BankService {
         return bankClients.stream()
                 .filter(client -> client.getPhone().equals(phone))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+                .orElseThrow(() -> new RuntimeException("bank.Client not found"));
     }
 
     public void changeBalance(String phone, Currency currency, int value) throws Exception {

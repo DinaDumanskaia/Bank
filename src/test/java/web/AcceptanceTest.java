@@ -12,22 +12,20 @@ import java.net.URLConnection;
 public class AcceptanceTest {
     URL url;
 
-    @Test
-    public void testGettingBalanceForNonExistentClient() throws IOException {
-
-        url = new URL("http://localhost:8080/get_balance?id=7&currency=rub");
+    private BufferedReader getBufferedReader(String urlString) throws IOException {
+        url = new URL(urlString);
         URLConnection conn = url.openConnection();
         conn.setConnectTimeout(20);
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        Assert.assertEquals("Balance couldn't be returned for the client", bufferedReader.readLine());
+        return new BufferedReader(new InputStreamReader(conn.getInputStream()));
+    }
+
+    @Test
+    public void testGettingBalanceForNonExistentClient() throws IOException {
+        Assert.assertEquals("Balance couldn't be returned for the client", getBufferedReader("http://localhost:8080/get_balance?id=7&currency=rub").readLine());
     }
 
     @Test
     public void testIsClientExists() throws IOException {
-        url = new URL("http://localhost:8080/client_exists?id=7");
-        URLConnection conn = url.openConnection();
-        conn.setConnectTimeout(20);
-        BufferedReader bufferedReader = new BufferedReader((new InputStreamReader((conn.getInputStream()))));
-        Assert.assertEquals("Client not found", bufferedReader.readLine());
+        Assert.assertEquals("Client not found", getBufferedReader("http://localhost:8080/client_exists?id=7").readLine());
     }
 }

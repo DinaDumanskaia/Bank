@@ -1,8 +1,11 @@
 package bank;
 
+import org.springframework.stereotype.Service;
+
 import java.util.Date;
 
-public class DateProviderImpl implements DateProvider {
+@Service
+public class RealDateProviderImpl implements DateProvider {
 
     @Override
     public Date getDate() {

@@ -1,19 +1,24 @@
 package bank;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class BankService {
 
     private final List<Client> bankClients = new ArrayList<>();
     private final DateProvider dateProvider;
 
+    @Autowired
     public BankService(DateProvider dateProvider) {
         this.dateProvider = dateProvider;
     }
 
-    public void createNewClient(String phoneNumber) {
-        Client client = new Client(phoneNumber, dateProvider);
+    public void createNewClient(String id) {
+        Client client = new Client(id, dateProvider);
         bankClients.add(client);
     }
 

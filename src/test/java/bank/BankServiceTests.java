@@ -14,8 +14,6 @@ public class BankServiceTests {
     @Before
     public void init() throws Exception {
         bankService = new BankService(new FakeDateProviderImpl());
-        UUID uuid = Controller.createClient();
-        bankService.createNewClient(uuid.toString());
         bankService.createNewClient("+7");
         bankService.createNewClient("+79");
     }

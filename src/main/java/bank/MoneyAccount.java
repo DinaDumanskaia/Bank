@@ -8,9 +8,7 @@ public class MoneyAccount {
     private final DateProvider dateProvider;
     private final List<TransactionData> transactions = new ArrayList<>();
 
-    public MoneyAccount(DateProvider dateProvider) {
-        this.dateProvider = dateProvider;
-    }
+    public MoneyAccount(DateProvider dateProvider) {this.dateProvider = dateProvider;}
 
     public int getBalance() {
         int balance = 0;

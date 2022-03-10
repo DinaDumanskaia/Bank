@@ -3,19 +3,19 @@ package bank;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import web.Controller;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
 public class BankServiceTests {
     private BankService bankService;
     @Before
-    public void init() {
-        bankService = new BankService(new MockDateProviderImpl());
+    public void init() throws Exception {
+        bankService = new BankService(new FakeDateProviderImpl());
+        UUID uuid = Controller.createClient();
+        bankService.createNewClient(uuid.toString());
         bankService.createNewClient("+7");
         bankService.createNewClient("+79");
     }
@@ -64,7 +64,7 @@ public class BankServiceTests {
         TransactionData lastTransaction = listOfTransactions.get(listOfTransactions.size() - 1);
         Date date = lastTransaction.getDate();
 
-        Assert.assertEquals(MockDateProviderImpl.DATE, date);
+        Assert.assertEquals(FakeDateProviderImpl.DATE, date);
     }
 
     @Test

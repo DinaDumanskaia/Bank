@@ -17,9 +17,10 @@ public class BankService {
         this.dateProvider = dateProvider;
     }
 
-    public void createNewClient(String id) {
+    public void createNewClient(String id) throws Exception {
         Client client = new Client(id, dateProvider);
         bankClients.add(client);
+
     }
 
     public boolean clientExists(String phoneNumber) {
@@ -74,5 +75,9 @@ public class BankService {
 
     public List<TransactionData> getTransactions(String phone) {
         return getClientByPhone(phone).getListOfTransactions();
+    }
+
+    public List<Client> findAll() {
+        return bankClients;
     }
 }

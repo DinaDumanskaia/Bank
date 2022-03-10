@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.UUID;
 
 import static java.net.http.HttpRequest.BodyPublishers.noBody;
 
@@ -50,10 +51,37 @@ public class AcceptanceTest {
         Assert.assertEquals(201, response.statusCode());
     }
 
-//    @Test
-    public void postClient() throws IOException, URISyntaxException, InterruptedException {
+    @Test
+    public void headClient() throws IOException, URISyntaxException, InterruptedException {
         final HttpResponse<String> response = sendRequest(postRequest("http://localhost:8080/bank/v1/clients/"));
 
         Assert.assertEquals(200, checkHead("http://localhost:8080/bank/v1/clients/" + response.body()));
     }
+
+    @Test
+    public void postClientThatIsNotExist() throws IOException, URISyntaxException, InterruptedException {
+        Assert.assertEquals(404, checkHead("http://localhost:8080/bank/v1/clients/" + UUID.randomUUID()));
+    }
+
+/*
+    GET
+    ClientDto : {
+        balance : 100
+    }
+
+    POST
+    http://localhost:8080/bank/v1/clients/124i01982509182059/transactions
+    {money : 200}
+
+    GET
+    http://localhost:8080/bank/v1/clients/124i01982509182059/transactions
+    [
+    {money : 200, date: }
+    {money : 2200}
+    {money : -00}
+    {money : 200}
+    ]
+
+ */
+
 }

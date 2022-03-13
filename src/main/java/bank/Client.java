@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Client {
-    private final String phoneNumber;
+    private final String id;
     private final Map<Currency, MoneyAccount> moneyAccounts = new HashMap<>();
     private final DateProvider dateProvider;
 
@@ -20,13 +20,13 @@ public class Client {
         return getMoneyAccount(Currency.RUB);
     }
 
-    public Client(String phoneNumber, DateProvider dateProvider) {
-        this.phoneNumber = phoneNumber;
+    public Client(String id, DateProvider dateProvider) {
+        this.id = id;
         this.dateProvider = dateProvider;
     }
 
-    public String getPhone() {
-        return phoneNumber;
+    public String getID() {
+        return id;
     }
 
     void changeBalance(int value, Currency currency) throws Exception {

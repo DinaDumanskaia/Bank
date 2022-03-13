@@ -2,9 +2,12 @@ package bank;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import web.ClientDTO;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class BankService {
@@ -17,15 +20,18 @@ public class BankService {
         this.dateProvider = dateProvider;
     }
 
-    public void createNewClient(String id) throws Exception {
+    public ClientDTO createNewClient() throws Exception {
+        final String id = String.valueOf(UUID.randomUUID());
+
         Client client = new Client(id, dateProvider);
         bankClients.add(client);
 
+        return new ClientDTO(id, 0, Collections.emptyList());
     }
 
     public boolean clientExists(String phoneNumber) {
         return bankClients.stream()
-                .anyMatch(client -> client.getPhone().equals(phoneNumber));
+                .anyMatch(client -> client.getID().equals(phoneNumber));
     }
 
     public void transferMoney(String sender, String recipient, int value) throws Exception {
@@ -50,31 +56,31 @@ public class BankService {
         clientTo.changeBalance(value, currency);
     }
 
-    private Client getClientByPhone(String phone) {
+    private Client getClientByPhone(String id) {
         return bankClients.stream()
-                .filter(client -> client.getPhone().equals(phone))
+                .filter(client -> client.getID().equals(id))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("bank.Client not found"));
     }
 
-    public void changeBalance(String phone, Currency currency, int value) throws Exception {
-        getClientByPhone(phone).changeMoneyAccountBalance(currency, value);
+    public void changeBalance(String id, Currency currency, int value) throws Exception {
+        getClientByPhone(id).changeMoneyAccountBalance(currency, value);
     }
 
-    public void changeBalance(String phone, int value) throws Exception {
-        changeBalance(phone, Currency.RUB, value);
+    public void changeBalance(String id, int value) throws Exception {
+        changeBalance(id, Currency.RUB, value);
     }
 
-    public int getBalance(String phone, Currency currency) {
-        return getClientByPhone(phone).getMoneyAccountBalance(currency);
+    public int getBalance(String id, Currency currency) {
+        return getClientByPhone(id).getMoneyAccountBalance(currency);
     }
 
-    public int getBalance(String phone) {
-        return getBalance(phone, Currency.RUB);
+    public int getBalance(String id) {
+        return getBalance(id, Currency.RUB);
     }
 
-    public List<TransactionData> getTransactions(String phone) {
-        return getClientByPhone(phone).getListOfTransactions();
+    public List<TransactionData> getTransactions(String id) {
+        return getClientByPhone(id).getListOfTransactions();
     }
 
     public List<Client> findAll() {

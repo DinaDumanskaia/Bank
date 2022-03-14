@@ -67,6 +67,7 @@ public class AcceptanceTest {
 
         String id = createClientRequest();
         changeBalanceRequest(firstTransaction, id);
+
         int statusCodeAfterSecondTransaction = changeBalanceRequest(secondTransaction, id);
         Assert.assertEquals(HttpStatus.BAD_REQUEST.value(), statusCodeAfterSecondTransaction);
 
@@ -75,15 +76,26 @@ public class AcceptanceTest {
     }
 
     private int getCurrentBalanceRequest(String id) throws IOException, InterruptedException, URISyntaxException {
-        HttpResponse<String> getBalance = sendRequest(getRequest("http://localhost:8080/bank/v1/clients/" + id + "/balance/"));
+        HttpResponse<String> getBalance = sendRequest(getRequest(composeBalanceUrl(id)));
+
+
         int currentBalance = Integer.parseInt(getBalance.body());
+        //int currentBalance = Integer.parseInt(getBalance.body());
         return currentBalance;
     }
 
     private int changeBalanceRequest(int transaction, String id) throws IOException, InterruptedException, URISyntaxException {
-        HttpResponse<String> putBalanceResponse = sendRequest(createChangeBalanceRequest("http://localhost:8080/bank/v1/clients/" + id + "/balance/", transaction));
-        int statusCode = putBalanceResponse.statusCode();
-        return statusCode;
+        HttpResponse<String> postBalanceResponse =
+                sendRequest(createChangeBalanceRequest(composeTransactionUrl(id), transaction));
+        return postBalanceResponse.statusCode();
+    }
+
+    private String composeTransactionUrl(String id) {
+        return "http://localhost:8080/bank/v1/clients/" + id + "/transaction/";
+    }
+
+    private String composeBalanceUrl(String id) {
+        return "http://localhost:8080/bank/v1/clients/" + id + "/balance/";
     }
 
     private String createClientRequest() throws IOException, InterruptedException, URISyntaxException {
@@ -101,6 +113,12 @@ public class AcceptanceTest {
                 .build()
                 .send(request, HttpResponse.BodyHandlers.ofString());
     }
+
+/*    private HttpResponse<String> sendIntRequest(HttpRequest request) throws IOException, InterruptedException {
+        return HttpClient.newBuilder()
+                .build()
+                .send(request, HttpResponse.BodyHandlers.ofString());
+    }*/
 
     private HttpRequest headRequest(String urlInputString) throws URISyntaxException {
         return HttpRequest.newBuilder()
@@ -127,7 +145,8 @@ public class AcceptanceTest {
         String requestBody = createJSONChangeBalanceRequestBody(transaction);
         return HttpRequest.newBuilder()
                 .uri(new URI(urlInputString))
-                .PUT(HttpRequest.BodyPublishers.ofString(requestBody))
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .header("Content-Type", "application/json")
                 .build();
     }
 

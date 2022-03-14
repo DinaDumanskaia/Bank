@@ -15,17 +15,16 @@ import java.nio.file.AccessDeniedException;
 
 @ControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
-    @ResponseBody
-    @ExceptionHandler({IllegalArgumentException.class})
-    public ResponseEntity<Object> handleIllegalArgumentException(Exception exception, WebRequest request) {
-        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-        return new ResponseEntity<>(exception.getMessage(), headers, HttpStatus.INTERNAL_SERVER_ERROR);
+
+    @ExceptionHandler(value = {IllegalArgumentException.class, IllegalStateException.class})
+    protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
+        String bodyOfResponse = "This should be application specific";
+        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
-    @ExceptionHandler({FileNotFoundException.class})
-    public ResponseEntity<Object> handleFileNotFoundException(Exception exception, WebRequest request) {
-        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-        return new ResponseEntity<>(exception.getMessage(), headers, HttpStatus.NOT_FOUND);
+
+    @ExceptionHandler(value = {Exception.class})
+    protected ResponseEntity<Object> handleException(RuntimeException ex, WebRequest request) {
+        String bodyOfResponse = "Try again";
+        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 }

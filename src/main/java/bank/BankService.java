@@ -2,12 +2,9 @@ package bank;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import web.ClientDTO;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class BankService {
@@ -20,18 +17,15 @@ public class BankService {
         this.dateProvider = dateProvider;
     }
 
-    public ClientDTO createNewClient() throws Exception {
-        final String id = String.valueOf(UUID.randomUUID());
-
-        Client client = new Client(id, dateProvider);
+    public Client createNewClient(String clientID) {
+        Client client = new Client(clientID, dateProvider);
         bankClients.add(client);
-
-        return new ClientDTO(id, 0, Collections.emptyList());
+        return client;
     }
 
-    public boolean clientExists(String phoneNumber) {
+    public boolean clientExists(String clientId) {
         return bankClients.stream()
-                .anyMatch(client -> client.getID().equals(phoneNumber));
+                .anyMatch(client -> client.getID().equals(clientId));
     }
 
     public void transferMoney(String sender, String recipient, int value) throws Exception {
@@ -50,13 +44,13 @@ public class BankService {
     }
 
     private void makeTransfer(String sender, String recipient, int value, Currency currency) throws Exception {
-        Client clientFrom = getClientByPhone(sender);
-        Client clientTo = getClientByPhone(recipient);
+        Client clientFrom = getClientById(sender);
+        Client clientTo = getClientById(recipient);
         clientFrom.changeBalance(-1 * value, currency);
         clientTo.changeBalance(value, currency);
     }
 
-    private Client getClientByPhone(String id) {
+    private Client getClientById(String id) {
         return bankClients.stream()
                 .filter(client -> client.getID().equals(id))
                 .findFirst()
@@ -64,7 +58,7 @@ public class BankService {
     }
 
     public void changeBalance(String id, Currency currency, int value) throws Exception {
-        getClientByPhone(id).changeMoneyAccountBalance(currency, value);
+        getClientById(id).changeMoneyAccountBalance(currency, value);
     }
 
     public void changeBalance(String id, int value) throws Exception {
@@ -72,7 +66,7 @@ public class BankService {
     }
 
     public int getBalance(String id, Currency currency) {
-        return getClientByPhone(id).getMoneyAccountBalance(currency);
+        return getClientById(id).getMoneyAccountBalance(currency);
     }
 
     public int getBalance(String id) {
@@ -80,7 +74,7 @@ public class BankService {
     }
 
     public List<TransactionData> getTransactions(String id) {
-        return getClientByPhone(id).getListOfTransactions();
+        return getClientById(id).getListOfTransactions();
     }
 
     public List<Client> findAll() {

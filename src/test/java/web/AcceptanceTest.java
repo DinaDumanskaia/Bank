@@ -4,20 +4,77 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.UUID;
 
+import static java.lang.Thread.sleep;
 import static java.net.http.HttpRequest.BodyPublishers.noBody;
 
 public class AcceptanceTest {
+    @BeforeClass
+    public static void setUp() throws InterruptedException, IOException {
+        new Thread(AcceptanceTest::runApp).start();
+        int pid = getPid();
+        Runtime.getRuntime().addShutdownHook(new Thread(AcceptanceTest::kill));
+        System.out.println("App has started. Pid is " + pid);
+    }
+
+    private static void kill() {
+        try {
+            Process exec = Runtime.getRuntime().exec("cmd /c taskkill /F /PID " + getPid());
+            outputLines(exec.getInputStream()).forEach(System.out::println);
+            outputLines(exec.getErrorStream()).forEach(System.out::println);
+
+            System.out.println("Application has been killed");
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static int getPid() throws IOException, InterruptedException {
+        for (int i = 0; i <= 10; i++) {
+            sleep(5000);
+            Process exec = Runtime.getRuntime().exec("cmd /c netstat -aon | find \"8080\" | find \"LISTEN\"");
+            List<String> outputLines = outputLines(exec.getInputStream());
+            if (! outputLines.isEmpty()) return getPid(outputLines);
+            System.out.println("App has not started yet");
+        }
+        throw new RuntimeException("App has not started");
+    }
+
+    private static int getPid(List<String> lines) {
+        String firstLine = lines.get(0);
+        String[] words = firstLine.split("\\s+");
+        return Integer.parseInt(words[5]);
+    }
+
+    private static void runApp() {
+        try {
+            Process exec = Runtime.getRuntime().exec("cmd /c mvn exec:java");
+            outputLines(exec.getErrorStream()).forEach(System.out::println);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static List<String> outputLines(InputStream inputStream) {
+        BufferedReader reader=new BufferedReader( new InputStreamReader(inputStream));
+        return reader.lines().toList();
+    }
+
 
     @Test
     public void testLocalHost() throws IOException, URISyntaxException, InterruptedException {

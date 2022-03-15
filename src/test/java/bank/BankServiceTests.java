@@ -11,10 +11,9 @@ import static org.junit.Assert.assertEquals;
 
 public class BankServiceTests {
     private BankService bankService;
-    ClientDTO client1;
-    ClientDTO client2;
+
     @Before
-    public void init() throws Exception {
+    public void init() {
         bankService = new BankService(new FakeDateProviderImpl());
         bankService.createNewClient("+7");
         bankService.createNewClient("+79");
@@ -92,7 +91,7 @@ public class BankServiceTests {
         assertEquals(80, bankService.getBalance("+7"));
     }
 
-    @Test(expected = Exception.class)
+    @Test(expected = NegativeBalanceException.class)
     public void testOverdraft() throws Exception {
         bankService.changeBalance("+7", 200);
         bankService.changeBalance("+7", -300);

@@ -22,7 +22,7 @@ public class MoneyAccount {
         if (isTransactionAvailable(value)) {
             transactions.add(new TransactionData(value, dateProvider.getDate()));
         } else {
-            throw new Exception("Your balance in is less than zero");
+            throw new NegativeBalanceException("Your balance in is less than zero");
         }
     }
 

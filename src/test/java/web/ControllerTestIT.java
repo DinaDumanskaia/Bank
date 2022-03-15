@@ -66,6 +66,17 @@ public class ControllerTestIT {
         ).andReturn();
     }
 
+    @Test
+    public void testDepositNegative() throws Exception {
+    resultActions = createClient();
+
+        mvc.perform(post("/bank/v1/clients/" + clientId(resultActions) + "/transaction/")
+            .content(getTransactionDto(-100))
+            .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isBadRequest());
+
+        }
+
     private String getTransactionDto(int transaction) throws JsonProcessingException {
         final TransactionDto transactionDto = new TransactionDto();
         transactionDto.setBalance(transaction);

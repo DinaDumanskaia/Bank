@@ -46,7 +46,7 @@ public class AcceptanceTest {
     @Test
     public void testCheckCreatedClientBalance() throws URISyntaxException, IOException, InterruptedException {
         HttpResponse<String> response = sendRequest(postRequest("http://localhost:8080/bank/v1/clients/"));
-        Assert.assertEquals(0, getClientDTO(response.body()).getBalance());
+        Assert.assertEquals(0, getClientBalanceFromJson(response.body()));
     }
 
     @Test
@@ -177,8 +177,4 @@ public class AcceptanceTest {
         return "{\"balance\":\"" + transaction + "\"}";
     }
 
-    private ClientDTO getClientDTO(String body) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readValue(body, ClientDTO.class);
-    }
 }

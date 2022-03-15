@@ -67,7 +67,7 @@ public class BankControllerTest {
         mvc.perform(post(transactionsUrl(result))
                 .content(getTransactionDto(100))
                 .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk());
+        ).andExpect(status().isCreated());
     }
 
     private String transactionsUrl(MvcResult result) throws UnsupportedEncodingException, JsonProcessingException {
@@ -95,7 +95,7 @@ public class BankControllerTest {
 
     private String getTransactionDto(int transaction) throws JsonProcessingException {
         final TransactionDto transactionDto = new TransactionDto();
-        transactionDto.setBalance(transaction);
+        transactionDto.setAmount(transaction);
         return objectMapper.writeValueAsString(transactionDto);
     }
 

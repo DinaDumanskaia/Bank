@@ -28,11 +28,9 @@ public class BankController {
     }
 
     @PostMapping("/bank/v1/clients/{clientId}/transactions/")
-    public ResponseEntity<Integer> changeBalance(@PathVariable("clientId") UUID clientId, @RequestBody TransactionDto transaction) throws Exception {
-        bankService.changeBalance(clientId, transaction.getBalance());
-
-        int balance = bankService.getBalance(clientId);
-        return new ResponseEntity<>(balance, HttpStatus.OK);
+    public ResponseEntity<Void> changeBalance(@PathVariable("clientId") UUID clientId, @RequestBody TransactionDto transaction) throws Exception {
+        bankService.changeBalance(clientId, transaction.getAmount());
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
 }

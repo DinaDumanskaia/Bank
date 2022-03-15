@@ -1,13 +1,13 @@
 package web;
 
 public class TransactionDto {
-    public int getBalance() {
-        return balance;
+    public int getAmount() {
+        return amount;
     }
 
-    public void setBalance(int balance) {
-        this.balance = balance;
+    public void setAmount(int amount) {
+        this.amount = amount;
     }
 
-    private int balance;
+    private int amount;
 }

@@ -56,7 +56,7 @@ public class AcceptanceTest {
         String clientId = postClient();
 
         int statusCode = postTransaction(transaction, clientId);
-        Assert.assertEquals(HttpStatus.OK.value(), statusCode);
+        Assert.assertEquals(HttpStatus.CREATED.value(), statusCode);
 
         int currentBalance = getCurrentBalanceRequest(clientId);
         Assert.assertEquals(transaction, currentBalance);
@@ -148,7 +148,7 @@ public class AcceptanceTest {
     }
 
     private String createJSONChangeBalanceRequestBody(int transaction) {
-        return "{\"balance\":\"" + transaction + "\"}";
+        return "{\"amount\":\"" + transaction + "\"}";
     }
 
 }

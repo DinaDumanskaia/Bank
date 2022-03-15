@@ -62,12 +62,16 @@ public class BankControllerTest {
 
     @Test
     public void testDepositMoneyForCreatedClient() throws Exception {
-        MvcResult mvcResult = createClient();
+        MvcResult result = createClient();
 
-        mvc.perform(post("/bank/v1/clients/" + clientId(mvcResult) + "/transaction/")
+        mvc.perform(post(transactionsUrl(result))
                 .content(getTransactionDto(100))
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk());
+    }
+
+    private String transactionsUrl(MvcResult result) throws UnsupportedEncodingException, JsonProcessingException {
+        return "/bank/v1/clients/" + clientId(result) + "/transactions/";
     }
 
     @Test
@@ -82,7 +86,7 @@ public class BankControllerTest {
     public void testDepositNegative() throws Exception {
         MvcResult result = createClient();
 
-        mvc.perform(post("/bank/v1/clients/" + clientId(result) + "/transaction/")
+        mvc.perform(post(transactionsUrl(result))
             .content(getTransactionDto(-100))
             .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isBadRequest());

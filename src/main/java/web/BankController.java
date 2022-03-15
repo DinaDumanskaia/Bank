@@ -27,12 +27,12 @@ public class BankController {
         return ClientDTO.toDto(client);
     }
 
-    @PostMapping("/bank/v1/clients/{clientId}/transaction/")
+    @PostMapping("/bank/v1/clients/{clientId}/transactions/")
     public ResponseEntity<Integer> changeBalance(@PathVariable("clientId") UUID clientId, @RequestBody TransactionDto transaction) throws Exception {
         bankService.changeBalance(clientId, transaction.getBalance());
 
-        int i = bankService.getBalance(clientId);
-        return new ResponseEntity<>(i, HttpStatus.OK);
+        int balance = bankService.getBalance(clientId);
+        return new ResponseEntity<>(balance, HttpStatus.OK);
     }
 
 }

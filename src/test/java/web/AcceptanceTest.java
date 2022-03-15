@@ -89,7 +89,7 @@ public class AcceptanceTest {
     }
 
     private String composeTransactionUrl(String id) {
-        return "http://localhost:8080/bank/v1/clients/" + id + "/transaction/";
+        return "http://localhost:8080/bank/v1/clients/" + id + "/transactions/";
     }
 
     private String postClient() throws IOException, InterruptedException, URISyntaxException {

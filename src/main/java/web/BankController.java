@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-public class Controller {
+public class BankController {
 
     @Autowired
     BankService bankService;
@@ -25,11 +25,6 @@ public class Controller {
     public ClientDTO getClient(@PathVariable("clientId") UUID clientId) {
         Client client = bankService.getClient(clientId);
         return ClientDTO.toDto(client);
-    }
-
-    @GetMapping("/bank/v1/clients/{clientId}/balance")
-    public ResponseEntity<Integer> getClientBalance(@PathVariable("clientId") UUID clientId) {
-        return new ResponseEntity<>(bankService.getBalance(clientId), HttpStatus.OK);
     }
 
     @PostMapping("/bank/v1/clients/{clientId}/transaction/")

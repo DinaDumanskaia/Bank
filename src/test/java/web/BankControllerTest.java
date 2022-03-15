@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public class ControllerTestIT {
+public class BankControllerTest {
     @Autowired
     MockMvc mvc;
     ObjectMapper objectMapper = new ObjectMapper();

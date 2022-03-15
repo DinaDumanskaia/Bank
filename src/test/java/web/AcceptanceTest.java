@@ -49,27 +49,16 @@ public class AcceptanceTest {
         Assert.assertEquals(0, getClientBalanceFromJson(response.body()));
     }
 
+
     @Test
     public void testChangeBalance() throws URISyntaxException, IOException, InterruptedException {
-        int transaction = 100;
-        String id = postClient();
-
-        int statusCode = postTransaction(transaction, id);
-        Assert.assertEquals(HttpStatus.OK.value(), statusCode);
-
-        int currentBalance = getCurrentBalanceRequest(id);
-        Assert.assertEquals(transaction, currentBalance);
-    }
-
-    @Test
-    public void testChangeBalance2() throws URISyntaxException, IOException, InterruptedException {
         int transaction = 100;
         String clientId = postClient();
 
         int statusCode = postTransaction(transaction, clientId);
         Assert.assertEquals(HttpStatus.OK.value(), statusCode);
 
-        int currentBalance = getCurrentBalanceRequest2(clientId);
+        int currentBalance = getCurrentBalanceRequest(clientId);
         Assert.assertEquals(transaction, currentBalance);
     }
 
@@ -89,11 +78,6 @@ public class AcceptanceTest {
     }
 
     private int getCurrentBalanceRequest(String id) throws IOException, InterruptedException, URISyntaxException {
-        HttpResponse<String> response = sendRequest(getRequest(composeBalanceUrl(id)));
-        return Integer.parseInt(response.body());
-    }
-
-    private int getCurrentBalanceRequest2(String id) throws IOException, InterruptedException, URISyntaxException {
         HttpResponse<String> clientResponse = sendRequest(getRequest("http://localhost:8080/bank/v1/clients/" + id));
         return getClientBalanceFromJson(clientResponse.body());
     }
@@ -106,10 +90,6 @@ public class AcceptanceTest {
 
     private String composeTransactionUrl(String id) {
         return "http://localhost:8080/bank/v1/clients/" + id + "/transaction/";
-    }
-
-    private String composeBalanceUrl(String id) {
-        return "http://localhost:8080/bank/v1/clients/" + id + "/balance/";
     }
 
     private String postClient() throws IOException, InterruptedException, URISyntaxException {
@@ -136,12 +116,6 @@ public class AcceptanceTest {
                 .build()
                 .send(request, HttpResponse.BodyHandlers.ofString());
     }
-
-/*    private HttpResponse<String> sendIntRequest(HttpRequest request) throws IOException, InterruptedException {
-        return HttpClient.newBuilder()
-                .build()
-                .send(request, HttpResponse.BodyHandlers.ofString());
-    }*/
 
     private HttpRequest headRequest(String urlInputString) throws URISyntaxException {
         return HttpRequest.newBuilder()

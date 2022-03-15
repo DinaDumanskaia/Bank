@@ -1,7 +1,9 @@
 package web;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.*;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -64,14 +67,23 @@ public class BankControllerTest {
     public void testDepositMoneyForCreatedClient() throws Exception {
         MvcResult result = createClient();
 
-        mvc.perform(post(transactionsUrl(result))
-                .content(getTransactionDto(100))
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isCreated());
+        postTransaction(100, clientId(result));
     }
 
-    private String transactionsUrl(MvcResult result) throws UnsupportedEncodingException, JsonProcessingException {
-        return "/bank/v1/clients/" + clientId(result) + "/transactions/";
+    private void postTransaction(int money, String clientId) throws Exception {
+            MvcResult mvcResult = mvc.perform(
+                post(transactionsUrl(clientId))
+                        .content(getMoneyDto(money))
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isCreated()).andReturn();
+    }
+
+    private TransactionDTO getTransactionDTO(MvcResult mvcResult) throws JsonProcessingException, UnsupportedEncodingException {
+        return objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TransactionDTO.class);
+    }
+
+    private String transactionsUrl(String clientId) {
+        return "/bank/v1/clients/" + clientId + "/transactions/";
     }
 
     @Test
@@ -86,17 +98,36 @@ public class BankControllerTest {
     public void testDepositNegative() throws Exception {
         MvcResult result = createClient();
 
-        mvc.perform(post(transactionsUrl(result))
-            .content(getTransactionDto(-100))
+        mvc.perform(post(transactionsUrl(clientId(result)))
+            .content(getMoneyDto(-100))
             .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isBadRequest());
-
         }
 
-    private String getTransactionDto(int transaction) throws JsonProcessingException {
-        final TransactionDto transactionDto = new TransactionDto();
-        transactionDto.setAmount(transaction);
-        return objectMapper.writeValueAsString(transactionDto);
+    @Test
+    public void getTransactions() throws Exception {
+        MvcResult mvcResult = createClient();
+        postTransaction(10, clientId(mvcResult));
+        postTransaction(400, clientId(mvcResult));
+        MvcResult getClientResult = mvc.perform(get(transactionsUrl(clientId(mvcResult))))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        List<TransactionDTO> transactionsDTO = getTransactionsDTO(getClientResult);
+        Assert.assertEquals(10, transactionsDTO.get(0).getAmount());
+        Assert.assertEquals(400, transactionsDTO.get(1).getAmount());
+    }
+
+    private List<TransactionDTO> getTransactionsDTO(MvcResult getClientResult) throws UnsupportedEncodingException, JsonProcessingException {
+        final String json = getClientResult.getResponse().getContentAsString();
+        return objectMapper.readValue(json, new TypeReference<>() {
+        });
+    }
+
+    private String getMoneyDto(int transaction) throws JsonProcessingException {
+        final MoneyDto moneyDTO = new MoneyDto();
+        moneyDTO.setAmount(transaction);
+        return objectMapper.writeValueAsString(moneyDTO);
     }
 
     private String clientId(MvcResult result) throws UnsupportedEncodingException, JsonProcessingException {

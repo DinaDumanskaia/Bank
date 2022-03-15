@@ -11,7 +11,7 @@ public class MoneyAccount {
     public int getBalance() {
         int balance = 0;
         for (TransactionData transaction : transactions) {
-            balance += transaction.getValue();
+            balance += transaction.getAmount();
         }
         return balance;
     }

@@ -1,6 +1,6 @@
 package web;
 
-public class TransactionDto {
+public class MoneyDto {
     public int getAmount() {
         return amount;
     }

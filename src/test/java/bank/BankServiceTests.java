@@ -118,7 +118,7 @@ public class BankServiceTests {
     private List<Integer> getTransactionValues(List<TransactionData> accountStatement) {
         List<Integer> values = new ArrayList<>();
         for (TransactionData transactionData : accountStatement) {
-            values.add(transactionData.getValue());
+            values.add(transactionData.getAmount());
         }
         return values;
     }

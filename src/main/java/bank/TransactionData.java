@@ -4,11 +4,11 @@ import java.util.Date;
 
 public class TransactionData {
 
-    private final int value;
+    private final int amount;
     private final Date date;
 
     public TransactionData(int value, Date date) {
-        this.value = value;
+        this.amount = value;
         this.date = date;
     }
 
@@ -16,11 +16,11 @@ public class TransactionData {
         return date;
     }
 
-    public int getValue() {
-        return value;
+    public int getAmount() {
+        return amount;
     }
 
     TransactionData copy() {
-        return new TransactionData(value, date);
+        return new TransactionData(amount, date);
     }
 }

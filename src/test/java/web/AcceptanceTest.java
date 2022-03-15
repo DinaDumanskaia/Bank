@@ -77,6 +77,21 @@ public class AcceptanceTest {
         Assert.assertEquals(firstTransaction, currentBalance);
     }
 
+    @Test
+    public void getTransactionsList() throws IOException, URISyntaxException, InterruptedException {
+        int firstTransaction = 10;
+        int secondTransaction = 500;
+
+        String id = postClient();
+        postTransaction(firstTransaction, id);
+        postTransaction(secondTransaction, id);
+
+        HttpResponse<String> response = sendRequest(getRequest("http://localhost:8080/bank/v1/clients/" + id + "/transactions/"));
+        Assert.assertEquals(firstTransaction, getAmountFromTransaction(response.body(), 0));
+        Assert.assertEquals(secondTransaction, getAmountFromTransaction(response.body(), 1));
+    }
+
+
     private int getCurrentBalanceRequest(String id) throws IOException, InterruptedException, URISyntaxException {
         HttpResponse<String> clientResponse = sendRequest(getRequest("http://localhost:8080/bank/v1/clients/" + id));
         return getClientBalanceFromJson(clientResponse.body());
@@ -100,6 +115,11 @@ public class AcceptanceTest {
     private String getClientIdFromJson(String jsonBody) throws JsonProcessingException {
         JsonNode jsonNode = new ObjectMapper().readTree(jsonBody);
         return jsonNode.get("id").asText();
+    }
+
+    private int getAmountFromTransaction(String jsonBody, int transactionIndex) throws JsonProcessingException {
+        JsonNode jsonNode = new ObjectMapper().readTree(jsonBody);
+        return jsonNode.get(transactionIndex).get("amount").asInt();
     }
 
     private int getClientBalanceFromJson(String jsonBody) throws JsonProcessingException {

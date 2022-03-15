@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.UUID;
 
 @RestController
@@ -19,15 +18,13 @@ public class Controller {
     @PostMapping("/bank/v1/clients/")
     public ResponseEntity<ClientDTO> createClient() {
         Client client = bankService.createNewClient();
-        return new ResponseEntity<>(new ClientDTO(client.getID(), 0, Collections.emptyList()), HttpStatus.CREATED);
+        return new ResponseEntity<>(ClientDTO.toDto(client), HttpStatus.CREATED);
     }
 
     @GetMapping("/bank/v1/clients/{clientId}")
-    public ResponseEntity<String> isClientExists(@PathVariable("clientId") UUID clientId) {
-        if (bankService.clientExists(clientId)) {
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
+    public ClientDTO getClient(@PathVariable("clientId") UUID clientId) {
+        Client client = bankService.getClient(clientId);
+        return ClientDTO.toDto(client);
     }
 
     @GetMapping("/bank/v1/clients/{clientId}/balance")

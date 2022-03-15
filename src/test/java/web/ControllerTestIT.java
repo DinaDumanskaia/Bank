@@ -2,6 +2,7 @@ package web;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -12,6 +13,7 @@ import org.springframework.test.web.servlet.*;
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -21,7 +23,6 @@ public class ControllerTestIT {
     @Autowired
     MockMvc mvc;
     ObjectMapper objectMapper = new ObjectMapper();
-    ResultActions resultActions;
 
     @Test
     public void postClient() throws Exception {
@@ -31,15 +32,26 @@ public class ControllerTestIT {
 
     @Test
     public void headClient() throws Exception {
-        resultActions = createClient();
+        MvcResult resultActions = createClient();
+
         mvc.perform(head("/bank/v1/clients/" + clientId(resultActions)))
                 .andExpect(status().isOk());
     }
 
-    private ResultActions createClient() throws Exception {
-        resultActions = mvc.perform(post("/bank/v1/clients/"))
-                .andExpect(status().isCreated());
-        return resultActions;
+    @Test
+    public void getClient() throws Exception {
+        MvcResult mvcResult = createClient();
+        MvcResult getClientResult = mvc.perform(get("/bank/v1/clients/" + clientId(mvcResult)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Assertions.assertEquals(0, getClientDTO(getClientResult).getBalance());
+    }
+
+    private MvcResult createClient() throws Exception {
+        return mvc.perform(post("/bank/v1/clients/"))
+                .andExpect(status().isCreated())
+                .andReturn();
     }
 
     @Test
@@ -50,9 +62,9 @@ public class ControllerTestIT {
 
     @Test
     public void testDepositMoneyForCreatedClient() throws Exception {
-        resultActions = createClient();
+        MvcResult mvcResult = createClient();
 
-        mvc.perform(post("/bank/v1/clients/" + clientId(resultActions) + "/transaction/")
+        mvc.perform(post("/bank/v1/clients/" + clientId(mvcResult) + "/transaction/")
                 .content(getTransactionDto(100))
                 .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk());
@@ -60,17 +72,17 @@ public class ControllerTestIT {
 
     @Test
     public void getBalanceOfCreatedClient() throws Exception {
-        resultActions = createClient();
-        mvc.perform(get("/bank/v1/clients/" + clientId(resultActions) + "/balance/")
+        MvcResult result = createClient();
+        mvc.perform(get("/bank/v1/clients/" + clientId(result) + "/balance/")
                 .contentType(MediaType.APPLICATION_JSON)
         ).andReturn();
     }
 
     @Test
     public void testDepositNegative() throws Exception {
-    resultActions = createClient();
+        MvcResult result = createClient();
 
-        mvc.perform(post("/bank/v1/clients/" + clientId(resultActions) + "/transaction/")
+        mvc.perform(post("/bank/v1/clients/" + clientId(result) + "/transaction/")
             .content(getTransactionDto(-100))
             .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isBadRequest());
@@ -83,10 +95,13 @@ public class ControllerTestIT {
         return objectMapper.writeValueAsString(transactionDto);
     }
 
-    private String clientId(ResultActions resultActions) throws UnsupportedEncodingException, JsonProcessingException {
-        final String json = resultActions.andReturn().getResponse().getContentAsString();
-        final ClientDTO clientDTO = objectMapper.readValue(json, ClientDTO.class);
-        return clientDTO.getId().toString();
+    private String clientId(MvcResult result) throws UnsupportedEncodingException, JsonProcessingException {
+        return getClientDTO(result).getId().toString();
+    }
+
+    private ClientDTO getClientDTO(MvcResult response) throws UnsupportedEncodingException, JsonProcessingException {
+        final String json = response.getResponse().getContentAsString();
+        return objectMapper.readValue(json, ClientDTO.class);
     }
 
 }

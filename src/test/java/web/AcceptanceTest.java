@@ -52,12 +52,24 @@ public class AcceptanceTest {
     @Test
     public void testChangeBalance() throws URISyntaxException, IOException, InterruptedException {
         int transaction = 100;
-        String id = createClientRequest();
+        String id = postClient();
 
-        int statusCode = changeBalanceRequest(transaction, id);
+        int statusCode = postTransaction(transaction, id);
         Assert.assertEquals(HttpStatus.OK.value(), statusCode);
 
         int currentBalance = getCurrentBalanceRequest(id);
+        Assert.assertEquals(transaction, currentBalance);
+    }
+
+    @Test
+    public void testChangeBalance2() throws URISyntaxException, IOException, InterruptedException {
+        int transaction = 100;
+        String clientId = postClient();
+
+        int statusCode = postTransaction(transaction, clientId);
+        Assert.assertEquals(HttpStatus.OK.value(), statusCode);
+
+        int currentBalance = getCurrentBalanceRequest2(clientId);
         Assert.assertEquals(transaction, currentBalance);
     }
 
@@ -66,10 +78,10 @@ public class AcceptanceTest {
         int firstTransaction = 10;
         int secondTransaction = -100;
 
-        String id = createClientRequest();
-        changeBalanceRequest(firstTransaction, id);
+        String id = postClient();
+        postTransaction(firstTransaction, id);
 
-        int statusCodeAfterSecondTransaction = changeBalanceRequest(secondTransaction, id);
+        int statusCodeAfterSecondTransaction = postTransaction(secondTransaction, id);
         Assert.assertEquals(HttpStatus.BAD_REQUEST.value(), statusCodeAfterSecondTransaction);
 
         int currentBalance = getCurrentBalanceRequest(id);
@@ -77,14 +89,16 @@ public class AcceptanceTest {
     }
 
     private int getCurrentBalanceRequest(String id) throws IOException, InterruptedException, URISyntaxException {
-        HttpResponse<String> getBalance = sendRequest(getRequest(composeBalanceUrl(id)));
-
-
-        //int currentBalance = Integer.parseInt(getBalance.body());
-        return Integer.parseInt(getBalance.body());
+        HttpResponse<String> response = sendRequest(getRequest(composeBalanceUrl(id)));
+        return Integer.parseInt(response.body());
     }
 
-    private int changeBalanceRequest(int transaction, String id) throws IOException, InterruptedException, URISyntaxException {
+    private int getCurrentBalanceRequest2(String id) throws IOException, InterruptedException, URISyntaxException {
+        HttpResponse<String> clientResponse = sendRequest(getRequest("http://localhost:8080/bank/v1/clients/" + id));
+        return getClientBalanceFromJson(clientResponse.body());
+    }
+
+    private int postTransaction(int transaction, String id) throws IOException, InterruptedException, URISyntaxException {
         HttpResponse<String> postBalanceResponse =
                 sendRequest(createChangeBalanceRequest(composeTransactionUrl(id), transaction));
         return postBalanceResponse.statusCode();
@@ -98,7 +112,7 @@ public class AcceptanceTest {
         return "http://localhost:8080/bank/v1/clients/" + id + "/balance/";
     }
 
-    private String createClientRequest() throws IOException, InterruptedException, URISyntaxException {
+    private String postClient() throws IOException, InterruptedException, URISyntaxException {
         HttpResponse<String> response = sendRequest(postRequest("http://localhost:8080/bank/v1/clients/"));
         return getClientIdFromJson(response.body());
     }
@@ -106,6 +120,11 @@ public class AcceptanceTest {
     private String getClientIdFromJson(String jsonBody) throws JsonProcessingException {
         JsonNode jsonNode = new ObjectMapper().readTree(jsonBody);
         return jsonNode.get("id").asText();
+    }
+
+    private int getClientBalanceFromJson(String jsonBody) throws JsonProcessingException {
+        JsonNode jsonNode = new ObjectMapper().readTree(jsonBody);
+        return jsonNode.get("balance").asInt();
     }
 
     private int checkHead(String urlInputString) throws IOException, InterruptedException, URISyntaxException {

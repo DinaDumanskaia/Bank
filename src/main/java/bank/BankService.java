@@ -55,7 +55,7 @@ public class BankService {
         return bankClients.stream()
                 .filter(client -> client.getID().equals(id))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("bank.Client not found"));
+                .orElseThrow(() -> new ClientNotFoundException("bank.Client not found"));
     }
 
     public void changeBalance(UUID id, Currency currency, int value) throws Exception {
@@ -78,4 +78,7 @@ public class BankService {
         return getClientById(id).getListOfTransactions();
     }
 
+    public Client getClient(UUID id) {
+        return getClientById(id);
+    }
 }

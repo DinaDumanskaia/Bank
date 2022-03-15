@@ -1,5 +1,6 @@
 package web;
 
+import bank.Client;
 import bank.TransactionData;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,6 +21,10 @@ public class ClientDTO {
         this.id = id;
         this.balance = balance;
         this.transactions = transactions;
+    }
+
+    static ClientDTO toDto(Client client) {
+        return new ClientDTO(client.getID(), client.getBalance(), client.getListOfTransactions());
     }
 
     public UUID getId() {

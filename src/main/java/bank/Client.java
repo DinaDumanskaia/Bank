@@ -3,9 +3,10 @@ package bank;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class Client {
-    private final String id;
+    private final UUID id;
     private final Map<Currency, MoneyAccount> moneyAccounts = new HashMap<>();
     private final DateProvider dateProvider;
 
@@ -20,12 +21,12 @@ public class Client {
         return getMoneyAccount(Currency.RUB);
     }
 
-    public Client(String id, DateProvider dateProvider) {
-        this.id = id;
+    public Client(DateProvider dateProvider) {
+        this.id = UUID.randomUUID();
         this.dateProvider = dateProvider;
     }
 
-    public String getID() {
+    public UUID getID() {
         return id;
     }
 

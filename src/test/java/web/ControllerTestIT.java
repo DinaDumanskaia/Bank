@@ -86,7 +86,7 @@ public class ControllerTestIT {
     private String clientId(ResultActions resultActions) throws UnsupportedEncodingException, JsonProcessingException {
         final String json = resultActions.andReturn().getResponse().getContentAsString();
         final ClientDTO clientDTO = objectMapper.readValue(json, ClientDTO.class);
-        return clientDTO.getId();
+        return clientDTO.getId().toString();
     }
 
 }

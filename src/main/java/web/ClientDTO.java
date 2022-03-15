@@ -5,15 +5,16 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
+import java.util.UUID;
 
 public class ClientDTO {
-    private String id;
+    private UUID id;
     private int balance;
     private List<TransactionData> transactions;
 
     @JsonCreator
     public ClientDTO(
-            @JsonProperty("id") String id,
+            @JsonProperty("id") UUID id,
             @JsonProperty("balance") int balance,
             @JsonProperty("transactions") List<TransactionData> transactions) {
         this.id = id;
@@ -21,7 +22,7 @@ public class ClientDTO {
         this.transactions = transactions;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
@@ -33,7 +34,7 @@ public class ClientDTO {
         return transactions;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

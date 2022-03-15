@@ -1,6 +1,7 @@
 package web;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,7 +34,7 @@ public class AcceptanceTest {
     @Test
     public void testHeadClient() throws IOException, URISyntaxException, InterruptedException {
         final HttpResponse<String> response = sendRequest(postRequest("http://localhost:8080/bank/v1/clients/"));
-        String id = getClientDTO(response.body()).getId();
+        String id = getClientIdFromJson(response.body());
         Assert.assertEquals(HttpStatus.OK.value(), checkHead("http://localhost:8080/bank/v1/clients/" + id));
     }
 
@@ -79,9 +80,8 @@ public class AcceptanceTest {
         HttpResponse<String> getBalance = sendRequest(getRequest(composeBalanceUrl(id)));
 
 
-        int currentBalance = Integer.parseInt(getBalance.body());
         //int currentBalance = Integer.parseInt(getBalance.body());
-        return currentBalance;
+        return Integer.parseInt(getBalance.body());
     }
 
     private int changeBalanceRequest(int transaction, String id) throws IOException, InterruptedException, URISyntaxException {
@@ -100,8 +100,12 @@ public class AcceptanceTest {
 
     private String createClientRequest() throws IOException, InterruptedException, URISyntaxException {
         HttpResponse<String> response = sendRequest(postRequest("http://localhost:8080/bank/v1/clients/"));
-        String id = getClientDTO(response.body()).getId();
-        return id;
+        return getClientIdFromJson(response.body());
+    }
+
+    private String getClientIdFromJson(String jsonBody) throws JsonProcessingException {
+        JsonNode jsonNode = new ObjectMapper().readTree(jsonBody);
+        return jsonNode.get("id").asText();
     }
 
     private int checkHead(String urlInputString) throws IOException, InterruptedException, URISyntaxException {

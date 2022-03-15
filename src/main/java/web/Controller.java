@@ -1,6 +1,7 @@
 package web;
 
 import bank.BankService;
+import bank.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +18,12 @@ public class Controller {
 
     @PostMapping("/bank/v1/clients/")
     public ResponseEntity<ClientDTO> createClient() {
-        UUID id = UUID.randomUUID();
-        bankService.createNewClient(id.toString());
-        return new ResponseEntity<>(new ClientDTO(id.toString(), 0, Collections.emptyList()), HttpStatus.CREATED);
+        Client client = bankService.createNewClient();
+        return new ResponseEntity<>(new ClientDTO(client.getID(), 0, Collections.emptyList()), HttpStatus.CREATED);
     }
 
     @GetMapping("/bank/v1/clients/{clientId}")
-    public ResponseEntity<String> isClientExists(@PathVariable("clientId") String clientId) {
+    public ResponseEntity<String> isClientExists(@PathVariable("clientId") UUID clientId) {
         if (bankService.clientExists(clientId)) {
             return ResponseEntity.ok().build();
         }
@@ -31,12 +31,12 @@ public class Controller {
     }
 
     @GetMapping("/bank/v1/clients/{clientId}/balance")
-    public ResponseEntity<Integer> getClientBalance(@PathVariable("clientId") String clientId) {
+    public ResponseEntity<Integer> getClientBalance(@PathVariable("clientId") UUID clientId) {
         return new ResponseEntity<>(bankService.getBalance(clientId), HttpStatus.OK);
     }
 
     @PostMapping("/bank/v1/clients/{clientId}/transaction/")
-    public ResponseEntity<Integer> changeBalance(@PathVariable("clientId") String clientId, @RequestBody TransactionDto transaction) throws Exception {
+    public ResponseEntity<Integer> changeBalance(@PathVariable("clientId") UUID clientId, @RequestBody TransactionDto transaction) throws Exception {
         bankService.changeBalance(clientId, transaction.getBalance());
 
         int i = bankService.getBalance(clientId);

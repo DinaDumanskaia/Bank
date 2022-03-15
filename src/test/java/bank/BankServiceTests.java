@@ -24,7 +24,7 @@ public class BankServiceTests {
     public void testGetClient() throws Exception {
         int rubleBalance = 100;
         bankService.changeBalance(clientId1, Currency.RUB, rubleBalance);
-        Client client = bankService.getClient(clientId1);
+        Client client = bankService.getClientById(clientId1);
 
         Assert.assertEquals(rubleBalance, client.getBalance());
     }
@@ -75,7 +75,7 @@ public class BankServiceTests {
 
     @Test(expected = ClientNotFoundException.class)
     public void testClientNotFound() {
-        bankService.getClient(UUID.randomUUID());
+        bankService.getClientById(UUID.randomUUID());
     }
 
     @Test

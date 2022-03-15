@@ -44,14 +44,14 @@ public class BankService {
         }
     }
 
-    private void makeTransfer(UUID sender, UUID recipient, int value, Currency currency) throws Exception {
+    private void makeTransfer(UUID sender, UUID recipient, int value, Currency currency) {
         Client clientFrom = getClientById(sender);
         Client clientTo = getClientById(recipient);
-        clientFrom.changeBalance(-1 * value, currency);
-        clientTo.changeBalance(value, currency);
+        clientFrom.changeBalance(-1 * value, currency, dateProvider.getDate());
+        clientTo.changeBalance(value, currency, dateProvider.getDate());
     }
 
-    private Client getClientById(UUID id) {
+    public Client getClientById(UUID id) {
         return bankClients.stream()
                 .filter(client -> client.getID().equals(id))
                 .findFirst()
@@ -59,7 +59,7 @@ public class BankService {
     }
 
     public void changeBalance(UUID id, Currency currency, int value) throws Exception {
-        getClientById(id).changeMoneyAccountBalance(currency, value);
+        getClientById(id).changeBalance(value, currency, dateProvider.getDate());
     }
 
     public void changeBalance(UUID id, int value) throws Exception {
@@ -78,7 +78,4 @@ public class BankService {
         return getClientById(id).getListOfTransactions();
     }
 
-    public Client getClient(UUID id) {
-        return getClientById(id);
-    }
 }

@@ -23,7 +23,7 @@ public class BankController {
 
     @GetMapping("/bank/v1/clients/{clientId}")
     public ClientDTO getClient(@PathVariable("clientId") UUID clientId) {
-        Client client = bankService.getClient(clientId);
+        Client client = bankService.getClientById(clientId);
         return ClientDTO.toDto(client);
     }
 

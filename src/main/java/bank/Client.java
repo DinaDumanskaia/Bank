@@ -1,9 +1,6 @@
 package bank;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class Client {
     private final UUID id;
@@ -12,7 +9,7 @@ public class Client {
 
     private MoneyAccount getMoneyAccount(Currency currency) {
         if (moneyAccounts.get(currency) == null) {
-            moneyAccounts.put(currency, new MoneyAccount(dateProvider));
+            moneyAccounts.put(currency, new MoneyAccount());
         }
         return moneyAccounts.get(currency);
     }
@@ -30,12 +27,8 @@ public class Client {
         return id;
     }
 
-    void changeBalance(int value, Currency currency) throws Exception {
-        getMoneyAccount(currency).changeBalance(value);
-    }
-
-    public void changeMoneyAccountBalance(Currency currency, int value) throws Exception {
-        getMoneyAccount(currency).changeBalance(value);
+    void changeBalance(int value, Currency currency, Date timestamp) {
+        getMoneyAccount(currency).changeBalance(value, timestamp);
     }
 
     public int getMoneyAccountBalance(Currency currency) {

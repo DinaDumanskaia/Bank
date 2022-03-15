@@ -1,14 +1,12 @@
 package bank;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class MoneyAccount {
-    private final DateProvider dateProvider;
     private final List<TransactionData> transactions = new ArrayList<>();
-
-    public MoneyAccount(DateProvider dateProvider) {this.dateProvider = dateProvider;}
 
     public int getBalance() {
         int balance = 0;
@@ -18,9 +16,9 @@ public class MoneyAccount {
         return balance;
     }
 
-    public void changeBalance(int value) throws Exception {
+    public void changeBalance(int value, Date timestamp) {
         if (isTransactionAvailable(value)) {
-            transactions.add(new TransactionData(value, dateProvider.getDate()));
+            transactions.add(new TransactionData(value, timestamp));
         } else {
             throw new NegativeBalanceException("Your balance in is less than zero");
         }

@@ -3,10 +3,12 @@ package DataBase;
 import bank.domain.Client;
 import bank.application.ClientNotFoundException;
 import bank.application.ClientRepository;
+import bank.domain.Currency;
 import bank.infrastructure.database.RealClientRepository;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Date;
 import java.util.UUID;
 
 public class RepositoryTest {
@@ -25,6 +27,7 @@ public class RepositoryTest {
     @Test
     public void testClientEqualsRepositoryClient() {
         Client client = new Client();
+        client.changeBalance(200, Currency.RUB, new Date());
         repository.saveClient(client);
         Client returnedClient = repository.getClientById(client.getID());
         Assert.assertEquals(client, returnedClient);

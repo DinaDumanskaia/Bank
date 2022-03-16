@@ -7,11 +7,9 @@ import bank.domain.Currency;
 import bank.domain.MoneyAccount;
 import bank.domain.Transaction;
 
-import java.sql.Date;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -50,12 +48,12 @@ public class RealClientRepository implements ClientRepository {
                     "LEFT JOIN TRANSACTIONS TR ON TR.ACCOUNT_ID = A.ACCOUNT_ID \n" +
                     "WHERE C.ID = '" + clientId + "'");
             resultSet.next();
-            Date transaction_date_ = resultSet.getDate("TRANSACTION_DATE");
+            Date transactionDate = new Date(resultSet.getTimestamp("TRANSACTION_DATE").getTime());
             int transaction = resultSet.getInt("AMOUNT");
             Currency currency = Currency.valueOf(resultSet.getString("CURRENCY"));
 
             List<Transaction> transactions = new ArrayList<>();
-            transactions.add(new Transaction(transaction, transaction_date_));
+            transactions.add(new Transaction(transaction, transactionDate));
             Client client = new Client(clientId, Map.of(currency, new MoneyAccount(transactions)));
 
             return client;
@@ -83,6 +81,13 @@ public class RealClientRepository implements ClientRepository {
              var con = DriverManager.getConnection(url, "sa", "password");
              var stm = con.createStatement();
              stm.execute("INSERT INTO CLIENTS VALUES ('" + client.getID() + "')");
+            UUID account_id = UUID.randomUUID();
+            stm.execute("INSERT INTO ACCOUNTS VALUES('" + account_id + "', '" + client.getID() + "', 'RUB')");
+//            stm.execute("INSERT INTO TRANSACTIONS VALUES('" + UUID.randomUUID() + "', '" + account_id + "', '200', ?)");
+            Date date = client.getListOfTransactions().get(0).getDate();
+            PreparedStatement preparedStatement = con.prepareStatement("INSERT INTO TRANSACTIONS VALUES('" + UUID.randomUUID() + "', '" + account_id + "', '200', ?)");
+            preparedStatement.setTimestamp(1, new Timestamp(date.getTime()));
+            preparedStatement.execute();
 
 //            if (rs.next()) {
 //

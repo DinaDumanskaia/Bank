@@ -8,11 +8,11 @@ import java.util.logging.Logger;
 public class JavaSeH2Memory {
     public static void main(String[] args) {
 
-        var url = "jdbc:h2:mem:";
+        var url = "jdbc:h2:tcp://localhost/~/test";
 
-        try (var con = DriverManager.getConnection(url);
+        try (var con = DriverManager.getConnection(url, "sa", "password");
              var stm = con.createStatement();
-             var rs = stm.executeQuery("SELECT 1+1")) {
+             var rs = stm.executeQuery("SELECT * FROM TEST")) {
 
             if (rs.next()) {
 

@@ -148,6 +148,17 @@ public class AcceptanceTest {
         Assert.assertEquals(secondTransaction, getAmountFromTransaction(response.body(), 1));
     }
 
+    @Test
+    public void testStartCreateChangeBalanceKillStartCheckBalance() throws IOException, URISyntaxException, InterruptedException {
+        String clientId = postClient();
+        postTransaction(10, clientId);
+
+        kill();
+
+        setUp();
+        Assert.assertEquals(10, getCurrentBalanceRequest(clientId));
+    }
+
 
     private int getCurrentBalanceRequest(String id) throws IOException, InterruptedException, URISyntaxException {
         HttpResponse<String> clientResponse = sendRequest(getRequest("http://localhost:8080/bank/v1/clients/" + id));

@@ -3,15 +3,14 @@ package bank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 public class BankService {
 
-    private final List<Client> bankClients = new ArrayList<>();
     private final DateProvider dateProvider;
+    private final FakeClientRepository clientRepository = new FakeClientRepository();
 
     @Autowired
     public BankService(DateProvider dateProvider) {
@@ -20,13 +19,12 @@ public class BankService {
 
     public Client createNewClient() {
         Client client = new Client(dateProvider);
-        bankClients.add(client);
+        clientRepository.saveClient(client);
         return client;
     }
 
     public boolean clientExists(UUID clientId) {
-        return bankClients.stream()
-                .anyMatch(client -> client.getID().equals(clientId));
+        return clientRepository.clientExists(clientId);
     }
 
     public void transferMoney(UUID sender, UUID recipient, int value) throws Exception {
@@ -39,27 +37,24 @@ public class BankService {
     }
 
     private void checkTransferAbility(UUID sender, UUID recipient) throws Exception {
-        if (!clientExists(sender) || !clientExists(recipient)) {
+        if (!clientRepository.clientExists(sender) || !clientRepository.clientExists(recipient)) {
             throw new Exception("bank.Client not found.");
         }
     }
 
     private void makeTransfer(UUID sender, UUID recipient, int value, Currency currency) {
-        Client clientFrom = getClientById(sender);
-        Client clientTo = getClientById(recipient);
+        Client clientFrom = clientRepository.getClientById(sender);
+        Client clientTo = clientRepository.getClientById(recipient);
         clientFrom.changeBalance(-1 * value, currency, dateProvider.getDate());
         clientTo.changeBalance(value, currency, dateProvider.getDate());
     }
 
     public Client getClientById(UUID id) {
-        return bankClients.stream()
-                .filter(client -> client.getID().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new ClientNotFoundException("bank.Client not found"));
+        return clientRepository.getClientById(id);
     }
 
     public void changeBalance(UUID id, Currency currency, int value) throws Exception {
-        getClientById(id).changeBalance(value, currency, dateProvider.getDate());
+        clientRepository.getClientById(id).changeBalance(value, currency, dateProvider.getDate());
     }
 
     public void changeBalance(UUID id, int value) throws Exception {
@@ -67,7 +62,7 @@ public class BankService {
     }
 
     public int getBalance(UUID id, Currency currency) {
-        return getClientById(id).getMoneyAccountBalance(currency);
+        return clientRepository.getClientById(id).getMoneyAccountBalance(currency);
     }
 
     public int getBalance(UUID id) {
@@ -75,7 +70,7 @@ public class BankService {
     }
 
     public List<TransactionData> getTransactions(UUID id) {
-        return getClientById(id).getListOfTransactions();
+        return clientRepository.getClientById(id).getListOfTransactions();
     }
 
 }

@@ -1,11 +1,12 @@
-package bank.Database;
+package bank.infrastructure.database;
 
-import bank.Client;
-import bank.ClientNotFoundException;
+import bank.domain.Client;
+import bank.application.ClientNotFoundException;
+import bank.application.ClientRepository;
 
 import java.util.UUID;
 
-public class RealRepository implements ClientRepository {
+public class RealClientRepository implements ClientRepository {
 
     @Override
     public boolean clientExists(UUID clientId) {

@@ -1,5 +1,8 @@
-package web;
+package bank;
 
+import bank.infrastructure.web.dto.ClientDto;
+import bank.infrastructure.web.dto.MoneyDto;
+import bank.infrastructure.web.dto.TransactionDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -78,8 +81,8 @@ public class BankControllerTest {
         ).andExpect(status().isCreated()).andReturn();
     }
 
-    private TransactionDTO getTransactionDTO(MvcResult mvcResult) throws JsonProcessingException, UnsupportedEncodingException {
-        return objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TransactionDTO.class);
+    private TransactionDto getTransactionDTO(MvcResult mvcResult) throws JsonProcessingException, UnsupportedEncodingException {
+        return objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TransactionDto.class);
     }
 
     private String transactionsUrl(String clientId) {
@@ -113,12 +116,12 @@ public class BankControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        List<TransactionDTO> transactionsDTO = getTransactionsDTO(getClientResult);
+        List<TransactionDto> transactionsDTO = getTransactionsDTO(getClientResult);
         Assert.assertEquals(10, transactionsDTO.get(0).getAmount());
         Assert.assertEquals(400, transactionsDTO.get(1).getAmount());
     }
 
-    private List<TransactionDTO> getTransactionsDTO(MvcResult getClientResult) throws UnsupportedEncodingException, JsonProcessingException {
+    private List<TransactionDto> getTransactionsDTO(MvcResult getClientResult) throws UnsupportedEncodingException, JsonProcessingException {
         final String json = getClientResult.getResponse().getContentAsString();
         return objectMapper.readValue(json, new TypeReference<>() {
         });
@@ -134,9 +137,9 @@ public class BankControllerTest {
         return getClientDTO(result).getId().toString();
     }
 
-    private ClientDTO getClientDTO(MvcResult response) throws UnsupportedEncodingException, JsonProcessingException {
+    private ClientDto getClientDTO(MvcResult response) throws UnsupportedEncodingException, JsonProcessingException {
         final String json = response.getResponse().getContentAsString();
-        return objectMapper.readValue(json, ClientDTO.class);
+        return objectMapper.readValue(json, ClientDto.class);
     }
 
 }

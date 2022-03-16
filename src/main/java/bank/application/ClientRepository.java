@@ -1,6 +1,6 @@
-package bank.Database;
+package bank.application;
 
-import bank.Client;
+import bank.domain.Client;
 
 import java.util.UUID;
 

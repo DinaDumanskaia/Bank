@@ -1,4 +1,4 @@
-package bank;
+package bank.domain;
 
 import java.util.ArrayList;
 import java.util.Date;

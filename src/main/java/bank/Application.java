@@ -1,9 +1,9 @@
-package web;
+package bank;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages = "bank, web")
+@SpringBootApplication
 public class Application {
 
     public static void main(String[] args) {

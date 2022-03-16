@@ -1,5 +1,7 @@
 package bank;
 
+import bank.application.DateProvider;
+
 import java.util.Date;
 
 public class FakeDateProviderImpl implements DateProvider {

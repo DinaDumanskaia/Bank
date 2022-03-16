@@ -1,6 +1,9 @@
-package bank;
+package bank.application;
 
-import bank.Database.FakeClientRepository;
+import bank.domain.Client;
+import bank.domain.Currency;
+import bank.domain.TransactionData;
+import bank.infrastructure.database.FakeClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +42,7 @@ public class BankService {
 
     private void checkTransferAbility(UUID sender, UUID recipient) throws Exception {
         if (!clientRepository.clientExists(sender) || !clientRepository.clientExists(recipient)) {
-            throw new Exception("bank.Client not found.");
+            throw new Exception("bank.domain.Client not found.");
         }
     }
 

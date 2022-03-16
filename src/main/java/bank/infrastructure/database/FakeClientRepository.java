@@ -1,7 +1,8 @@
-package bank.Database;
+package bank.infrastructure.database;
 
-import bank.Client;
-import bank.ClientNotFoundException;
+import bank.domain.Client;
+import bank.application.ClientNotFoundException;
+import bank.application.ClientRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ public class FakeClientRepository implements ClientRepository {
         return bankClients.stream()
                 .filter(client -> client.getID().equals(id))
                 .findFirst()
-                .orElseThrow(() -> new ClientNotFoundException("bank.Client not found"));
+                .orElseThrow(() -> new ClientNotFoundException("bank.domain.Client not found"));
     }
 
     @Override

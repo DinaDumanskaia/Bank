@@ -1,14 +1,15 @@
-package web;
+package bank.infrastructure.web;
 
-import bank.BankService;
-import bank.Client;
-import bank.TransactionData;
+import bank.application.BankService;
+import bank.domain.Client;
+import bank.infrastructure.web.dto.ClientDto;
+import bank.infrastructure.web.dto.MoneyDto;
+import bank.infrastructure.web.dto.TransactionDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -20,15 +21,15 @@ public class BankController {
     BankService bankService;
 
     @PostMapping("/bank/v1/clients/")
-    public ResponseEntity<ClientDTO> createClient() {
+    public ResponseEntity<ClientDto> createClient() {
         Client client = bankService.createNewClient();
-        return new ResponseEntity<>(ClientDTO.toDto(client), HttpStatus.CREATED);
+        return new ResponseEntity<>(ClientDto.toDto(client), HttpStatus.CREATED);
     }
 
     @GetMapping("/bank/v1/clients/{clientId}")
-    public ClientDTO getClient(@PathVariable("clientId") UUID clientId) {
+    public ClientDto getClient(@PathVariable("clientId") UUID clientId) {
         Client client = bankService.getClientById(clientId);
-        return ClientDTO.toDto(client);
+        return ClientDto.toDto(client);
     }
 
     @PostMapping("/bank/v1/clients/{clientId}/transactions/")
@@ -38,9 +39,9 @@ public class BankController {
     }
 
     @GetMapping("/bank/v1/clients/{clientId}/transactions/")
-    public List<TransactionDTO> getListOfTransactions(@PathVariable("clientId") UUID clientId) {
+    public List<TransactionDto> getListOfTransactions(@PathVariable("clientId") UUID clientId) {
         return bankService.getTransactions(clientId)
-                .stream().map(TransactionDTO::toDto)
+                .stream().map(TransactionDto::toDto)
                 .collect(Collectors.toList());
     }
 

@@ -1,4 +1,4 @@
-package bank;
+package bank.domain;
 
 public class NegativeBalanceException extends RuntimeException {
 

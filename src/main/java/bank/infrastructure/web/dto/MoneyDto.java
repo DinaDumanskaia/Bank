@@ -1,4 +1,4 @@
-package web;
+package bank.infrastructure.web.dto;
 
 public class MoneyDto {
     public int getAmount() {

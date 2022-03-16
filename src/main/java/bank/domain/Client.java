@@ -1,4 +1,4 @@
-package bank;
+package bank.domain;
 
 import java.util.*;
 
@@ -21,7 +21,7 @@ public class Client {
         return id;
     }
 
-    void changeBalance(int value, Currency currency, Date timestamp) {
+    public void changeBalance(int value, Currency currency, Date timestamp) {
         getMoneyAccount(currency).changeBalance(value, timestamp);
     }
 

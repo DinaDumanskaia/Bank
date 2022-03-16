@@ -1,5 +1,11 @@
 package bank;
 
+import bank.application.BankService;
+import bank.domain.Client;
+import bank.application.ClientNotFoundException;
+import bank.domain.Currency;
+import bank.domain.NegativeBalanceException;
+import bank.domain.TransactionData;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -15,15 +21,15 @@ public class BankServiceTests {
     @Test
     public void testChangeBalanceInRUB() throws Exception {
         int rubleBalance = 100;
-        bankService.changeBalance(clientId1, Currency.RUB, rubleBalance);
+        bankService.changeBalance(clientId1, bank.domain.Currency.RUB, rubleBalance);
 
-        Assert.assertEquals(rubleBalance, bankService.getBalance(clientId1, Currency.RUB));
+        Assert.assertEquals(rubleBalance, bankService.getBalance(clientId1, bank.domain.Currency.RUB));
     }
 
     @Test
     public void testGetClient() throws Exception {
         int rubleBalance = 100;
-        bankService.changeBalance(clientId1, Currency.RUB, rubleBalance);
+        bankService.changeBalance(clientId1, bank.domain.Currency.RUB, rubleBalance);
         Client client = bankService.getClientById(clientId1);
 
         Assert.assertEquals(rubleBalance, client.getBalance());
@@ -34,15 +40,15 @@ public class BankServiceTests {
         int usdBalance = 70;
         bankService.changeBalance(clientId1, Currency.USD, usdBalance);
 
-        Assert.assertEquals(usdBalance, bankService.getBalance(clientId1, Currency.USD));
+        Assert.assertEquals(usdBalance, bankService.getBalance(clientId1, bank.domain.Currency.USD));
     }
 
     @Test
     public void testChangeBalanceInEUR() throws Exception {
         int euroBalance = 50;
-        bankService.changeBalance(clientId1, Currency.EUR, euroBalance);
+        bankService.changeBalance(clientId1, bank.domain.Currency.EUR, euroBalance);
 
-        Assert.assertEquals(euroBalance, bankService.getBalance(clientId1, Currency.EUR));
+        Assert.assertEquals(euroBalance, bankService.getBalance(clientId1, bank.domain.Currency.EUR));
     }
 
     @Test

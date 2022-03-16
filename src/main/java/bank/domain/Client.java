@@ -29,12 +29,20 @@ public class Client {
         return getMoneyAccount(currency).getBalance();
     }
 
-    public List<TransactionData> getListOfTransactions() {
+    public List<Transaction> getListOfTransactions() {
         return getMoneyAccount().getMoneyAccountTransactionList();
     }
 
     public int getBalance() {
         return getMoneyAccountBalance(Currency.RUB);
+    }
+
+    @Override
+    public String toString() {
+        return "Client{" +
+                "id=" + id +
+                ", moneyAccounts=" + moneyAccounts +
+                '}';
     }
 }
 

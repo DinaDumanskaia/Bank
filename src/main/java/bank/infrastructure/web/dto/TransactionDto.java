@@ -1,11 +1,11 @@
 package bank.infrastructure.web.dto;
 
-import bank.domain.TransactionData;
+import bank.domain.Transaction;
 
 public class TransactionDto {
     int amount;
 
-    public static TransactionDto toDto(TransactionData transaction) {
+    public static TransactionDto toDto(Transaction transaction) {
         TransactionDto transactionDTO = new TransactionDto();
         transactionDTO.setAmount(transaction.getAmount());
         return transactionDTO;

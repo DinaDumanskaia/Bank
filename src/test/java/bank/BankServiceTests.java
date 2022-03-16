@@ -5,7 +5,7 @@ import bank.domain.Client;
 import bank.application.ClientNotFoundException;
 import bank.domain.Currency;
 import bank.domain.NegativeBalanceException;
-import bank.domain.TransactionData;
+import bank.domain.Transaction;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -56,7 +56,7 @@ public class BankServiceTests {
         bankService.changeBalance(clientId1, 50);
         bankService.changeBalance(clientId1, 100);
 
-        List<TransactionData> listOfTransactions = bankService.getTransactions(clientId1);
+        List<Transaction> listOfTransactions = bankService.getTransactions(clientId1);
         listOfTransactions.clear();
 
         Assert.assertEquals(0, listOfTransactions.size());
@@ -67,8 +67,8 @@ public class BankServiceTests {
     public void testTransactionDate() throws Exception {
         bankService.changeBalance(clientId1, 50);
 
-        List<TransactionData> listOfTransactions = bankService.getTransactions(clientId1);
-        TransactionData lastTransaction = listOfTransactions.get(listOfTransactions.size() - 1);
+        List<Transaction> listOfTransactions = bankService.getTransactions(clientId1);
+        Transaction lastTransaction = listOfTransactions.get(listOfTransactions.size() - 1);
         Date date = lastTransaction.getDate();
 
         Assert.assertEquals(FakeDateProviderImpl.DATE, date);
@@ -121,9 +121,9 @@ public class BankServiceTests {
         Assert.assertEquals(Arrays.asList(200, -100, 50), transactionValues);
     }
 
-    private List<Integer> getTransactionValues(List<TransactionData> accountStatement) {
+    private List<Integer> getTransactionValues(List<Transaction> accountStatement) {
         List<Integer> values = new ArrayList<>();
-        for (TransactionData transactionData : accountStatement) {
+        for (Transaction transactionData : accountStatement) {
             values.add(transactionData.getAmount());
         }
         return values;

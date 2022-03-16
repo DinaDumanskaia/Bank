@@ -2,7 +2,7 @@ package bank.application;
 
 import bank.domain.Client;
 import bank.domain.Currency;
-import bank.domain.TransactionData;
+import bank.domain.Transaction;
 import bank.infrastructure.database.FakeClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -73,7 +73,7 @@ public class BankService {
         return getBalance(id, Currency.RUB);
     }
 
-    public List<TransactionData> getTransactions(UUID id) {
+    public List<Transaction> getTransactions(UUID id) {
         return clientRepository.getClientById(id).getListOfTransactions();
     }
 

@@ -22,7 +22,7 @@ public class RepositoryTest {
         repository.getClientById(UUID.randomUUID());
     }
 
-//    @Test
+    @Test
     public void testClientEqualsRepositoryClient() {
         Client client = new Client();
         repository.saveClient(client);
@@ -36,5 +36,12 @@ public class RepositoryTest {
         repository.saveClient(client);
         Assert.assertTrue(repository.clientExists(client.getID()));
     }
+
+    @Test
+    public void testClientEqualsRepositoryClient2() {
+        Client returnedClient = repository.getClientById(UUID.fromString("bcc9372b-41ee-4efa-804d-1474e14777f1"));
+        System.out.println(returnedClient);
+    }
+
 
 }

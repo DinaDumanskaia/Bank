@@ -6,7 +6,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class MoneyAccount {
-    private final List<Transaction> transactions = new ArrayList<>();
+    private final List<Transaction> transactions;
+
+    public MoneyAccount() {
+        transactions = new ArrayList<>();
+    }
+
+    public MoneyAccount(List<Transaction> transactions) {
+        this.transactions = transactions;
+    }
 
     public int getBalance() {
         int balance = 0;

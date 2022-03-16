@@ -3,8 +3,18 @@ package bank.domain;
 import java.util.*;
 
 public class Client {
-    private final UUID id = UUID.randomUUID();
-    private final Map<Currency, MoneyAccount> moneyAccounts = new HashMap<>();
+    private final UUID id;
+    private final Map<Currency, MoneyAccount> moneyAccounts;
+
+    public Client() {
+        id = UUID.randomUUID();
+        moneyAccounts = new HashMap<>();
+    }
+
+    public Client(UUID id, Map<Currency, MoneyAccount> moneyAccounts) {
+        this.id = id;
+        this.moneyAccounts = moneyAccounts;
+    }
 
     private MoneyAccount getMoneyAccount(Currency currency) {
         if (moneyAccounts.get(currency) == null) {

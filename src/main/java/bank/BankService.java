@@ -18,7 +18,7 @@ public class BankService {
     }
 
     public Client createNewClient() {
-        Client client = new Client(dateProvider);
+        Client client = new Client();
         clientRepository.saveClient(client);
         return client;
     }
@@ -53,11 +53,11 @@ public class BankService {
         return clientRepository.getClientById(id);
     }
 
-    public void changeBalance(UUID id, Currency currency, int value) throws Exception {
+    public void changeBalance(UUID id, Currency currency, int value) {
         clientRepository.getClientById(id).changeBalance(value, currency, dateProvider.getDate());
     }
 
-    public void changeBalance(UUID id, int value) throws Exception {
+    public void changeBalance(UUID id, int value) {
         changeBalance(id, Currency.RUB, value);
     }
 

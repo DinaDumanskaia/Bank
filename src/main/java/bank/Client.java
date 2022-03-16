@@ -3,9 +3,8 @@ package bank;
 import java.util.*;
 
 public class Client {
-    private final UUID id;
+    private final UUID id = UUID.randomUUID();
     private final Map<Currency, MoneyAccount> moneyAccounts = new HashMap<>();
-    private final DateProvider dateProvider;
 
     private MoneyAccount getMoneyAccount(Currency currency) {
         if (moneyAccounts.get(currency) == null) {
@@ -16,11 +15,6 @@ public class Client {
 
     private MoneyAccount getMoneyAccount() {
         return getMoneyAccount(Currency.RUB);
-    }
-
-    public Client(DateProvider dateProvider) {
-        this.id = UUID.randomUUID();
-        this.dateProvider = dateProvider;
     }
 
     public UUID getID() {

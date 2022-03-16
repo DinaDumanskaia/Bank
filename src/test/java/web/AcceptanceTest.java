@@ -55,6 +55,17 @@ public class AcceptanceTest {
         throw new RuntimeException("App has not started");
     }
 
+    private static int getPid8082() throws IOException, InterruptedException {
+        for (int i = 0; i <= 10; i++) {
+            sleep(5000);
+            Process exec = Runtime.getRuntime().exec("cmd /c netstat -aon | find \"8082\" | find \"LISTEN\"");
+            List<String> outputLines = outputLines(exec.getInputStream());
+            if (! outputLines.isEmpty()) return getPid(outputLines);
+            System.out.println("App has not started yet");
+        }
+        throw new RuntimeException("App has not started");
+    }
+
     private static int getPid(List<String> lines) {
         String firstLine = lines.get(0);
         String[] words = firstLine.split("\\s+");
@@ -157,6 +168,11 @@ public class AcceptanceTest {
 
         setUp();
         Assert.assertEquals(10, getCurrentBalanceRequest(clientId));
+    }
+
+    @Test
+    public void testUserPort8082() throws IOException, InterruptedException {
+        System.out.println(getPid8082());
     }
 
 

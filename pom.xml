@@ -16,7 +16,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -41,8 +40,13 @@
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
-            <version>2.5.0</version>
+            <version>2.7.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.1.210</version>
         </dependency>
     </dependencies>
 

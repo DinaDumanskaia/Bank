@@ -2,14 +2,16 @@ package DataBase;
 
 import bank.Client;
 import bank.ClientNotFoundException;
-import bank.FakeClientRepository;
+import bank.Database.ClientRepository;
+import bank.Database.FakeClientRepository;
+import bank.Database.RealRepository;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.UUID;
 
 public class RepositoryTest {
-    FakeClientRepository repository = new FakeClientRepository();
+    ClientRepository repository = new RealRepository();
 
     @Test
     public void testClientDoesNotExists() {

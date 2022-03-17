@@ -46,5 +46,14 @@ public class RepositoryTest {
         System.out.println(returnedClient);
     }
 
+    @Test
+    public void testClientHasTwoTransactions() {
+        Client client = new Client();
+        client.changeBalance(200, Currency.RUB, new Date());
+        client.changeBalance(50, Currency.RUB, new Date());
+        repository.saveClient(client);
+        Client returnedClient = repository.getClientById(client.getID());
+        Assert.assertEquals(client, returnedClient);
+    }
 
 }

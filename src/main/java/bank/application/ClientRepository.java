@@ -10,4 +10,5 @@ public interface ClientRepository {
     Client getClientById(UUID id);
 
     void saveClient(Client client);
+
 }

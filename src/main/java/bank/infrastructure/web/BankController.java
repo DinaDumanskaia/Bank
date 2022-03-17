@@ -2,6 +2,7 @@ package bank.infrastructure.web;
 
 import bank.application.BankService;
 import bank.domain.Client;
+import bank.infrastructure.database.BadServiceConnection;
 import bank.infrastructure.web.dto.ClientDto;
 import bank.infrastructure.web.dto.MoneyDto;
 import bank.infrastructure.web.dto.TransactionDto;
@@ -21,7 +22,7 @@ public class BankController {
     BankService bankService;
 
     @PostMapping("/bank/v1/clients/")
-    public ResponseEntity<ClientDto> createClient() {
+    public ResponseEntity<ClientDto> createClient() throws BadServiceConnection {
         Client client = bankService.createNewClient();
         return new ResponseEntity<>(ClientDto.toDto(client), HttpStatus.CREATED);
     }

@@ -16,35 +16,30 @@ import java.util.logging.Logger;
 
 @Service
 public class RealClientRepository implements ClientRepository {
+    private final String DB_URL = "jdbc:h2:tcp://localhost/~/test";
 
     @Override
     public boolean clientExists(UUID clientId) {
-        var url = "jdbc:h2:tcp://localhost/~/test";
-
         try {
-            var con = DriverManager.getConnection(url, "sa", "password");
-            var stm = con.createStatement();
-            ResultSet resultSet = stm.executeQuery("select *from CLIENTS where id = '" + clientId + "'");
-
+            ResultSet resultSet = getStm().executeQuery("select *from CLIENTS where id = '" + clientId + "'");
             if (resultSet.next()) return true;
         } catch (SQLException ex) {
-
-            var lgr = Logger.getLogger(RealClientRepository.class.getName());
-            lgr.log(Level.SEVERE, ex.getMessage(), ex);
+            catchSQLException(ex);
         }
         return false;
     }
 
+    private Statement getStm() throws SQLException {
+        var con = DriverManager.getConnection(DB_URL, "sa", "password");
+        var stm = con.createStatement();
+        return stm;
+    }
+
     @Override
     public Client getClientById(UUID clientId) {
-        var url = "jdbc:h2:tcp://localhost/~/test";
 
         try {
-            var con = DriverManager.getConnection(url, "sa", "password");
-            var stm = con.createStatement();
-
-
-            ResultSet resultSet = stm.executeQuery("SELECT * FROM CLIENTS C\n" +
+            ResultSet resultSet = getStm().executeQuery("SELECT * FROM CLIENTS C\n" +
                     "LEFT JOIN ACCOUNTS A ON A.CLIENT_ID = C.ID\n" +
                     "LEFT JOIN TRANSACTIONS TR ON TR.ACCOUNT_ID = A.ACCOUNT_ID \n" +
                     "WHERE C.ID = '" + clientId + "'");
@@ -70,19 +65,15 @@ public class RealClientRepository implements ClientRepository {
             return new Client(clientId, Map.of(currency, new MoneyAccount(moneyAccountId, transactions)));
 
         } catch (SQLException ex) {
-
-            var lgr = Logger.getLogger(RealClientRepository.class.getName());
-            lgr.log(Level.SEVERE, ex.getMessage(), ex);
+            catchSQLException(ex);
         }
         throw new ClientNotFoundException("Client not found");
     }
 
     @Override
     public void saveClient(Client client) {
-        var url = "jdbc:h2:tcp://localhost/~/test";
-
         try {
-            var con = DriverManager.getConnection(url, "sa", "password");
+            var con = DriverManager.getConnection(DB_URL, "sa", "password");
             var stm = con.createStatement();
             stm.execute("MERGE INTO CLIENTS VALUES ('" + client.getID() + "')");
             UUID account_id = client.getMoneyAccountId(Currency.RUB);
@@ -102,10 +93,12 @@ public class RealClientRepository implements ClientRepository {
 //            }
 
         } catch (SQLException ex) {
-
-            var lgr = Logger.getLogger(RealClientRepository.class.getName());
-            lgr.log(Level.SEVERE, ex.getMessage(), ex);
+            catchSQLException(ex);
         }
+    }
+
+    private void catchSQLException(SQLException ex) {
+        throw new BadServiceConnection("Bad service connection");
     }
 
 }

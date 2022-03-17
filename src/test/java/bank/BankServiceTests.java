@@ -21,7 +21,7 @@ public class BankServiceTests {
     private final UUID clientId2 = bankService.createNewClient().getID();
 
     @Test
-    public void testChangeBalanceInRUB() throws Exception {
+    public void testChangeBalanceInRUB() {
         int rubleBalance = 100;
         bankService.changeBalance(clientId1, bank.domain.Currency.RUB, rubleBalance);
 

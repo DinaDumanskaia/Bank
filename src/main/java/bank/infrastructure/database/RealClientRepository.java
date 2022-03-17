@@ -1,5 +1,6 @@
 package bank.infrastructure.database;
 
+import bank.application.RepositoryError;
 import bank.domain.Client;
 import bank.application.ClientNotFoundException;
 import bank.application.ClientRepository;
@@ -11,8 +12,6 @@ import org.springframework.stereotype.Service;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @Service
 public class RealClientRepository implements ClientRepository {
@@ -98,7 +97,7 @@ public class RealClientRepository implements ClientRepository {
     }
 
     private void catchSQLException(SQLException ex) {
-        throw new BadServiceConnection("Bad service connection");
+        throw new RepositoryError("Bad service connection");
     }
 
 }

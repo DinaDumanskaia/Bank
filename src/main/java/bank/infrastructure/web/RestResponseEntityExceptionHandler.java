@@ -2,7 +2,7 @@ package bank.infrastructure.web;
 
 import bank.application.ClientNotFoundException;
 import bank.domain.NegativeBalanceException;
-import bank.infrastructure.database.BadServiceConnection;
+import bank.application.RepositoryError;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
-    @ExceptionHandler(BadServiceConnection.class)
+    @ExceptionHandler(RepositoryError.class)
     protected ResponseEntity<Object> handleBadServiceConnection(RuntimeException ex, WebRequest request) {
         String bodyOfResponse = "Bad service connection";
         return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);

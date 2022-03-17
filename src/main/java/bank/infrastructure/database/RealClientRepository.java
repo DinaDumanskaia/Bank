@@ -17,7 +17,7 @@ import java.util.Date;
 public class RealClientRepository implements ClientRepository {
     private final String DB_URL = "jdbc:h2:tcp://localhost/~/test";
     private final Connection connection;
-    private Statement statement;
+    private final Statement statement;
 
     public RealClientRepository() throws SQLException {
         this.connection = DriverManager.getConnection(DB_URL, "sa", "password");
@@ -41,22 +41,32 @@ public class RealClientRepository implements ClientRepository {
     @Override
     public Client getClientById(UUID clientId) {
         try {
-            ResultSet resultSet = getStatement().executeQuery("SELECT * FROM CLIENTS C\n" +
-                    "LEFT JOIN ACCOUNTS A ON A.CLIENT_ID = C.ID\n" +
-                    "LEFT JOIN TRANSACTIONS TR ON TR.ACCOUNT_ID = A.ACCOUNT_ID \n" +
-                    "WHERE C.ID = '" + clientId + "'");
-
-            List<Transaction> transactions = new ArrayList<>();
+            ResultSet resultSet = queryClientData(clientId);
             throwIfNoClient(resultSet.next());
-            UUID moneyAccountId = getAccountId(resultSet);
-            do {
-                if (hasTransaction(resultSet))
-                    transactions.add(createTransaction(resultSet));
-            } while (resultSet.next());
-            return new Client(clientId, Map.of(Currency.RUB, new MoneyAccount(moneyAccountId, transactions)));
+            return new Client(clientId, Map.of(Currency.RUB, createClient(resultSet)));
         } catch (SQLException ex) {
             throw new RepositoryError("Bad service connection");
         }
+    }
+
+    private ResultSet queryClientData(UUID clientId) throws SQLException {
+        return getStatement().executeQuery("SELECT * FROM CLIENTS C\n" +
+                "LEFT JOIN ACCOUNTS A ON A.CLIENT_ID = C.ID\n" +
+                "LEFT JOIN TRANSACTIONS TR ON TR.ACCOUNT_ID = A.ACCOUNT_ID \n" +
+                "WHERE C.ID = '" + clientId + "'");
+    }
+
+    private MoneyAccount createClient(ResultSet resultSet) throws SQLException {
+        return new MoneyAccount(getAccountId(resultSet), getTransactionList(resultSet));
+    }
+
+    private List<Transaction> getTransactionList(ResultSet resultSet) throws SQLException {
+        List<Transaction> transactions = new ArrayList<>();
+        do {
+            if (hasTransaction(resultSet))
+                transactions.add(createTransaction(resultSet));
+        } while (resultSet.next());
+        return transactions;
     }
 
     private UUID getAccountId(ResultSet resultSet) throws SQLException {
@@ -92,9 +102,12 @@ public class RealClientRepository implements ClientRepository {
     @Override
     public void saveClient(Client client) {
         try {
+            connection.setAutoCommit(false);
             persistClient(client);
             persistAccount(client);
             persistTransactions(client);
+            connection.commit();
+
         } catch (SQLException ex) {
             throw new RepositoryError("Bad service connection");
         }

@@ -8,11 +8,15 @@ import bank.infrastructure.database.RealClientRepository;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.UUID;
 
 public class RepositoryTest {
     ClientRepository repository = new RealClientRepository();
+
+    public RepositoryTest() throws SQLException {
+    }
 
     @Test
     public void testClientDoesNotExists() {

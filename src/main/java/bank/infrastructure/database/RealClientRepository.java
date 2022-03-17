@@ -16,6 +16,13 @@ import java.util.Date;
 @Service
 public class RealClientRepository implements ClientRepository {
     private final String DB_URL = "jdbc:h2:tcp://localhost/~/test";
+    private final Connection connection;
+    private Statement statement;
+
+    public RealClientRepository() throws SQLException {
+        this.connection = DriverManager.getConnection(DB_URL, "sa", "password");
+        statement = connection.createStatement();
+    }
 
     @Override
     public boolean clientExists(UUID clientId) {
@@ -67,31 +74,27 @@ public class RealClientRepository implements ClientRepository {
     @Override
     public void saveClient(Client client) {
         try {
-            var connection = DriverManager.getConnection(DB_URL, "sa", "password");
-            var statement = connection.createStatement();
-            UUID account_id = client.getMoneyAccountId(Currency.RUB);
-
-            saveClient(client, statement);
-            saveAccount(client, statement, account_id);
-            saveTransactions(client, connection, account_id);
+            persistClient(client);
+            persistAccount(client);
+            persistTransactions(client);
         } catch (SQLException ex) {
             throw new RepositoryError("Bad service connection");
         }
     }
 
-    private void saveAccount(Client client, Statement statement, UUID account_id) throws SQLException {
-        statement.execute("MERGE INTO ACCOUNTS VALUES('" + account_id + "', '" + client.getID() + "', 'RUB')");
+    private void persistAccount(Client client) throws SQLException {
+        this.statement.execute("MERGE INTO ACCOUNTS VALUES('" + client.getMoneyAccountId(Currency.RUB) + "', '" + client.getID() + "', 'RUB')");
     }
 
-    private void saveClient(Client client, Statement statement) throws SQLException {
-        statement.execute("MERGE INTO CLIENTS VALUES ('" + client.getID() + "')");
+    private void persistClient(Client client) throws SQLException {
+        this.statement.execute("MERGE INTO CLIENTS VALUES ('" + client.getID() + "')");
     }
 
-    private void saveTransactions(Client client, Connection connection, UUID account_id) throws SQLException {
+    private void persistTransactions(Client client) throws SQLException {
         for (Transaction transaction : client.getListOfTransactions()) {
             Date date = transaction.getDate();
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    "MERGE INTO TRANSACTIONS VALUES('" + transaction.getTransactionId() + "', '" + account_id + "', '" + transaction.getAmount() + "', ?)");
+            PreparedStatement preparedStatement = this.connection.prepareStatement(
+                    "MERGE INTO TRANSACTIONS VALUES('" + transaction.getTransactionId() + "', '" + client.getMoneyAccountId(Currency.RUB) + "', '" + transaction.getAmount() + "', ?)");
             preparedStatement.setTimestamp(1, new Timestamp(date.getTime()));
             preparedStatement.execute();
         }

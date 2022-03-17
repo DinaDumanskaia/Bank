@@ -2,15 +2,24 @@ package bank.domain;
 
 import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Transaction {
 
+    private final UUID transactionId;
     private final int amount;
     private final Date date;
+
+    public Transaction(UUID transactionId, int amount, Date date) {
+        this.transactionId = transactionId;
+        this.amount = amount;
+        this.date = date;
+    }
 
     public Transaction(int value, Date date) {
         this.amount = value;
         this.date = date;
+        transactionId = UUID.randomUUID();
     }
 
     public Date getDate() {
@@ -22,7 +31,7 @@ public class Transaction {
     }
 
     Transaction copy() {
-        return new Transaction(amount, date);
+        return new Transaction(transactionId, amount, date);
     }
 
     @Override
@@ -44,5 +53,9 @@ public class Transaction {
     @Override
     public int hashCode() {
         return Objects.hash(amount, date);
+    }
+
+    public UUID getTransactionId() {
+        return transactionId;
     }
 }

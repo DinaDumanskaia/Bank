@@ -39,6 +39,10 @@ public class Client {
         return getMoneyAccount(currency).getBalance();
     }
 
+    public UUID getMoneyAccountId(Currency currency) {
+        return getMoneyAccount(currency).getAccountId();
+    }
+
     public List<Transaction> getListOfTransactions() {
         return getMoneyAccount().getMoneyAccountTransactionList();
     }

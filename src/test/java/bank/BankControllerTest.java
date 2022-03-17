@@ -74,11 +74,11 @@ public class BankControllerTest {
     }
 
     private void postTransaction(int money, String clientId) throws Exception {
-            MvcResult mvcResult = mvc.perform(
+        mvc.perform(
                 post(transactionsUrl(clientId))
                         .content(getMoneyDto(money))
                         .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isCreated()).andReturn();
+        ).andExpect(status().isCreated());
     }
 
     private TransactionDto getTransactionDTO(MvcResult mvcResult) throws JsonProcessingException, UnsupportedEncodingException {

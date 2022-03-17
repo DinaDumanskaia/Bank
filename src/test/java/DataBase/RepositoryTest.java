@@ -56,4 +56,29 @@ public class RepositoryTest {
         Assert.assertEquals(client, returnedClient);
     }
 
+    @Test
+    public void testEmptyClient() {
+        Client client = new Client();
+        repository.saveClient(client);
+
+        Client returnedClient = repository.getClientById(client.getID());
+        returnedClient.changeBalance(200, Currency.RUB, new Date());
+        repository.saveClient(returnedClient);
+
+        Client returnedClientAfterChange = repository.getClientById(client.getID());
+        Assert.assertEquals(200, returnedClientAfterChange.getBalance());
+    }
+
+    @Test
+    public void secondTransactionShouldBeDifferent() {
+        Client client = new Client();
+        client.changeBalance(10, Currency.RUB, new Date());
+        repository.saveClient(client);
+        client.changeBalance(500, Currency.RUB, new Date());
+        repository.saveClient(client);
+        Client returnedClient = repository.getClientById(client.getID());
+        Assert.assertEquals(510, returnedClient.getBalance());
+    }
+
+
 }

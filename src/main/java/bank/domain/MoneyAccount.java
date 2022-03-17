@@ -1,19 +1,21 @@
 package bank.domain;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MoneyAccount {
+
+    private final UUID accountId;
     private final List<Transaction> transactions;
+
 
     public MoneyAccount() {
         transactions = new ArrayList<>();
+        accountId = UUID.randomUUID();
     }
 
-    public MoneyAccount(List<Transaction> transactions) {
+    public MoneyAccount(UUID accountId, List<Transaction> transactions) {
+        this.accountId = accountId;
         this.transactions = transactions;
     }
 
@@ -63,5 +65,9 @@ public class MoneyAccount {
     @Override
     public int hashCode() {
         return Objects.hash(transactions);
+    }
+
+    public UUID getAccountId() {
+        return accountId;
     }
 }

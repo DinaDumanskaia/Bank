@@ -6,16 +6,15 @@ import bank.application.ClientRepository;
 import bank.domain.Currency;
 import bank.domain.MoneyAccount;
 import bank.domain.Transaction;
+import org.springframework.stereotype.Service;
 
 import java.sql.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Service
 public class RealClientRepository implements ClientRepository {
 
     @Override
@@ -52,20 +51,23 @@ public class RealClientRepository implements ClientRepository {
 
             List<Transaction> transactions = new ArrayList<>();
             Currency currency = Currency.RUB;
+            UUID moneyAccountId = null;
             if (!resultSet.next()) {
                 throw new ClientNotFoundException("Client not found");
             }
             do {
+                if (resultSet.getTimestamp("TRANSACTION_DATE") == null) {
+                    continue;
+                }
                 Date transactionDate = new Date(resultSet.getTimestamp("TRANSACTION_DATE").getTime());
                 int transaction = resultSet.getInt("AMOUNT");
-                transactions.add(new Transaction(transaction, transactionDate));
+                moneyAccountId = UUID.fromString(resultSet.getString("ACCOUNT_ID"));
+                UUID transactionId = UUID.fromString(resultSet.getString("TRANSACTION_ID"));
+                transactions.add(new Transaction(transactionId, transaction, transactionDate));
             } while (resultSet.next());
 
-            return new Client(clientId, Map.of(currency, new MoneyAccount(transactions)));
-//            if (rs.next()) {
-//
-//                System.out.println(rs.getInt(1));
-//            }
+
+            return new Client(clientId, Map.of(currency, new MoneyAccount(moneyAccountId, transactions)));
 
         } catch (SQLException ex) {
 
@@ -82,13 +84,14 @@ public class RealClientRepository implements ClientRepository {
         try {
             var con = DriverManager.getConnection(url, "sa", "password");
             var stm = con.createStatement();
-            stm.execute("INSERT INTO CLIENTS VALUES ('" + client.getID() + "')");
-            UUID account_id = UUID.randomUUID();
-            stm.execute("INSERT INTO ACCOUNTS VALUES('" + account_id + "', '" + client.getID() + "', 'RUB')");
+            stm.execute("MERGE INTO CLIENTS VALUES ('" + client.getID() + "')");
+            UUID account_id = client.getMoneyAccountId(Currency.RUB);
+            stm.execute("MERGE INTO ACCOUNTS VALUES('" + account_id + "', '" + client.getID() + "', 'RUB')");
 //            stm.execute("INSERT INTO TRANSACTIONS VALUES('" + UUID.randomUUID() + "', '" + account_id + "', '200', ?)");
             for (Transaction transaction : client.getListOfTransactions()) {
                 Date date = transaction.getDate();
-                PreparedStatement preparedStatement = con.prepareStatement("INSERT INTO TRANSACTIONS VALUES('" + UUID.randomUUID() + "', '" + account_id + "', '" + transaction.getAmount() + "', ?)");
+                PreparedStatement preparedStatement = con.prepareStatement(
+                        "MERGE INTO TRANSACTIONS VALUES('" + transaction.getTransactionId() + "', '" + account_id + "', '" + transaction.getAmount() + "', ?)");
                 preparedStatement.setTimestamp(1, new Timestamp(date.getTime()));
                 preparedStatement.execute();
             }

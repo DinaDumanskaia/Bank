@@ -6,6 +6,8 @@ import bank.application.ClientNotFoundException;
 import bank.domain.Currency;
 import bank.domain.NegativeBalanceException;
 import bank.domain.Transaction;
+import bank.infrastructure.database.FakeClientRepository;
+import bank.infrastructure.database.RealClientRepository;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -14,7 +16,7 @@ import java.util.*;
 import static org.junit.Assert.assertEquals;
 
 public class BankServiceTests {
-    private final BankService bankService = new BankService(new FakeDateProviderImpl());
+    private final BankService bankService = new BankService(new FakeDateProviderImpl(), new FakeClientRepository());
     private final UUID clientId1 = bankService.createNewClient().getID();
     private final UUID clientId2 = bankService.createNewClient().getID();
 

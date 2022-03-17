@@ -3,7 +3,7 @@ package bank.application;
 import bank.domain.Client;
 import bank.domain.Currency;
 import bank.domain.Transaction;
-import bank.infrastructure.database.FakeClientRepository;
+import bank.infrastructure.database.RealClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +14,12 @@ import java.util.UUID;
 public class BankService {
 
     private final DateProvider dateProvider;
-    private final FakeClientRepository clientRepository = new FakeClientRepository();
+    private final ClientRepository clientRepository;
 
     @Autowired
-    public BankService(DateProvider dateProvider) {
+    public BankService(DateProvider dateProvider, ClientRepository clientRepository) {
         this.dateProvider = dateProvider;
+        this.clientRepository = clientRepository;
     }
 
     public Client createNewClient() {
@@ -58,7 +59,9 @@ public class BankService {
     }
 
     public void changeBalance(UUID id, Currency currency, int value) {
-        clientRepository.getClientById(id).changeBalance(value, currency, dateProvider.getDate());
+        Client client = clientRepository.getClientById(id);
+        client.changeBalance(value, currency, dateProvider.getDate());
+        clientRepository.saveClient(client);
     }
 
     public void changeBalance(UUID id, int value) {

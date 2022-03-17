@@ -47,24 +47,42 @@ public class RealClientRepository implements ClientRepository {
                     "WHERE C.ID = '" + clientId + "'");
 
             List<Transaction> transactions = new ArrayList<>();
-            Currency currency = Currency.RUB;
-            UUID moneyAccountId;
             throwIfNoClient(resultSet.next());
+            UUID moneyAccountId = getAccountId(resultSet);
             do {
-                moneyAccountId = UUID.fromString(resultSet.getString("ACCOUNT_ID"));
-                if (resultSet.getTimestamp("TRANSACTION_DATE") == null) {
-                    continue;
-                }
-                Date transactionDate = new Date(resultSet.getTimestamp("TRANSACTION_DATE").getTime());
-                int transaction = resultSet.getInt("AMOUNT");
-                UUID transactionId = UUID.fromString(resultSet.getString("TRANSACTION_ID"));
-                transactions.add(new Transaction(transactionId, transaction, transactionDate));
+                if (hasTransaction(resultSet))
+                    transactions.add(createTransaction(resultSet));
             } while (resultSet.next());
-            return new Client(clientId, Map.of(currency, new MoneyAccount(moneyAccountId, transactions)));
+            return new Client(clientId, Map.of(Currency.RUB, new MoneyAccount(moneyAccountId, transactions)));
         } catch (SQLException ex) {
             throw new RepositoryError("Bad service connection");
         }
     }
+
+    private UUID getAccountId(ResultSet resultSet) throws SQLException {
+        return UUID.fromString(resultSet.getString("ACCOUNT_ID"));
+    }
+
+    private Transaction createTransaction(ResultSet resultSet) throws SQLException {
+        return new Transaction(getTransactionId(resultSet), getAmount(resultSet), getTransactionDate(resultSet));
+    }
+
+    private UUID getTransactionId(ResultSet resultSet) throws SQLException {
+        return UUID.fromString(resultSet.getString("TRANSACTION_ID"));
+    }
+
+    private int getAmount(ResultSet resultSet) throws SQLException {
+        return resultSet.getInt("AMOUNT");
+    }
+
+    private Date getTransactionDate(ResultSet resultSet) throws SQLException {
+        return new Date(resultSet.getTimestamp("TRANSACTION_DATE").getTime());
+    }
+
+    private boolean hasTransaction(ResultSet resultSet) throws SQLException {
+        return resultSet.getString("TRANSACTION_ID") != null;
+    }
+
     private void throwIfNoClient(boolean hasNext) throws SQLException {
         if (!hasNext) {
             throw new ClientNotFoundException("Client not found");

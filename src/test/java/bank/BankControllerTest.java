@@ -117,8 +117,8 @@ public class BankControllerTest {
                 .andReturn();
 
         List<TransactionDto> transactionsDTO = getTransactionsDTO(getClientResult);
-        Assert.assertEquals(10, transactionsDTO.get(0).getAmount());
-        Assert.assertEquals(400, transactionsDTO.get(1).getAmount());
+        Assertions.assertEquals(10, transactionsDTO.get(0).getAmount());
+        Assertions.assertEquals(400, transactionsDTO.get(1).getAmount());
     }
 
     private List<TransactionDto> getTransactionsDTO(MvcResult getClientResult) throws UnsupportedEncodingException, JsonProcessingException {

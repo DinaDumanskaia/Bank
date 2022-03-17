@@ -41,12 +41,6 @@ public class RepositoryTest {
     }
 
     @Test
-    public void testClientEqualsRepositoryClient2() {
-        Client returnedClient = repository.getClientById(UUID.fromString("bcc9372b-41ee-4efa-804d-1474e14777f1"));
-        System.out.println(returnedClient);
-    }
-
-    @Test
     public void testClientHasTwoTransactions() {
         Client client = new Client();
         client.changeBalance(200, Currency.RUB, new Date());
@@ -72,6 +66,7 @@ public class RepositoryTest {
     @Test
     public void secondTransactionShouldBeDifferent() {
         Client client = new Client();
+        repository.saveClient(client);
         client.changeBalance(10, Currency.RUB, new Date());
         repository.saveClient(client);
         client.changeBalance(500, Currency.RUB, new Date());

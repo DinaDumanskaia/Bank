@@ -56,12 +56,12 @@ public class RealClientRepository implements ClientRepository {
                 throw new ClientNotFoundException("Client not found");
             }
             do {
+                moneyAccountId = UUID.fromString(resultSet.getString("ACCOUNT_ID"));
                 if (resultSet.getTimestamp("TRANSACTION_DATE") == null) {
                     continue;
                 }
                 Date transactionDate = new Date(resultSet.getTimestamp("TRANSACTION_DATE").getTime());
                 int transaction = resultSet.getInt("AMOUNT");
-                moneyAccountId = UUID.fromString(resultSet.getString("ACCOUNT_ID"));
                 UUID transactionId = UUID.fromString(resultSet.getString("TRANSACTION_ID"));
                 transactions.add(new Transaction(transactionId, transaction, transactionDate));
             } while (resultSet.next());

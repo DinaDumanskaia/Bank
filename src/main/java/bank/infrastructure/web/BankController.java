@@ -1,31 +1,29 @@
 package bank.infrastructure.web;
 
 import bank.application.BankService;
-import bank.domain.Client;
 import bank.application.RepositoryError;
+import bank.domain.Client;
 import bank.infrastructure.web.dto.ClientDto;
 import bank.infrastructure.web.dto.MoneyDto;
 import bank.infrastructure.web.dto.TransactionDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-//@RestController
+@RestController
 public class BankController {
 
     @Autowired
     BankService bankService;
 
     @PostMapping("/bank/v1/clients/")
-    public ResponseEntity<ClientDto> createClient(Model model) throws RepositoryError {
+    public ResponseEntity<ClientDto> createClient() throws RepositoryError {
         Client client = bankService.createNewClient();
-        model.addAttribute("client", client);
         return new ResponseEntity<>(ClientDto.toDto(client), HttpStatus.CREATED);
     }
 

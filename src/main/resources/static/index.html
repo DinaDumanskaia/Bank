@@ -1,16 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Bank cashier</title>
+  <meta charset="UTF-8" />
+  <title>Hello World</title>
+  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+
+  <!-- Don't use this in production: -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
-<h2>Bank cashier</h2>
-<form method="post" action="/bank/v1/clients/">
-    <input type="submit" value="Create a new client">
-</form>
-<form method="get" action="/changeBalanceForm.html">
-    <input type="submit" value="Change balance">
-</form>
+<div id="root"></div>
+<script type="text/babel" src="button_test.js"></script>
+<!--<script type="text/babel" src="like_button.js"></script>-->
 </body>
 </html>

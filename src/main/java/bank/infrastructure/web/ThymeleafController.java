@@ -24,14 +24,14 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Controller
+//@Controller
 public class ThymeleafController {
 
     @Autowired
     BankService bankService;
 
-    @PostMapping("/bank/v1/clients/")
-    public String createClient(Model model) throws RepositoryError {
+    @PostMapping("/bank/v2/clients/")
+    public String createNewClient(Model model) throws RepositoryError {
         Client client = bankService.createNewClient();
         model.addAttribute("id", client.getID());
         model.addAttribute("balance", client.getBalance());
@@ -39,7 +39,7 @@ public class ThymeleafController {
         return "client";
     }
 
-    @GetMapping("/bank/v1/clients/{clientId}/transactions")
+    @GetMapping("/bank/v2/clients/{clientId}/transactions")
     public String changeBalance(@PathVariable("clientId") UUID clientId, Model model) {
         model.getAttribute("transactionAmount");
         return "transaction";

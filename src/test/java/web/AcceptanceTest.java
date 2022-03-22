@@ -75,40 +75,27 @@ public class AcceptanceTest {
         return reader.lines().toList();
     }
 
-
     @Test
-    public void testLocalHost() throws IOException, URISyntaxException, InterruptedException {
-        Assert.assertEquals(HttpStatus.NOT_FOUND.value(), checkHead("http://localhost:8080/bank/v1/clients/2406846c-3c01-4297-b8c2-8a960ddefce6"));
-    }
-
-    @Test
-    public void testPostClientShouldReturn201() throws IOException, URISyntaxException, InterruptedException {
-        final HttpResponse<String> response = sendRequest(postRequest("http://localhost:8080/bank/v1/clients/"));
-
-        Assert.assertEquals(HttpStatus.CREATED.value(), response.statusCode());
-    }
-
-    @Test
-    public void testHeadClient() throws IOException, URISyntaxException, InterruptedException {
+    public void whenClientWasCreated_ShouldExists() throws IOException, URISyntaxException, InterruptedException {
         final HttpResponse<String> response = sendRequest(postRequest("http://localhost:8080/bank/v1/clients/"));
         String id = getClientIdFromJson(response.body());
         Assert.assertEquals(HttpStatus.OK.value(), checkHead("http://localhost:8080/bank/v1/clients/" + id));
     }
 
     @Test
-    public void testPostClientThatIsNotExist() throws IOException, URISyntaxException, InterruptedException {
+    public void whenClientIsNotCreated_ShouldReturnNotFound() throws IOException, URISyntaxException, InterruptedException {
         Assert.assertEquals(HttpStatus.NOT_FOUND.value(), checkHead("http://localhost:8080/bank/v1/clients/" + UUID.randomUUID()));
     }
 
     @Test
-    public void testCheckCreatedClientBalance() throws URISyntaxException, IOException, InterruptedException {
+    public void whenClientCreated_ShouldHaveZeroBalance() throws URISyntaxException, IOException, InterruptedException {
         HttpResponse<String> response = sendRequest(postRequest("http://localhost:8080/bank/v1/clients/"));
         Assert.assertEquals(0, getClientBalanceFromJson(response.body()));
     }
 
 
     @Test
-    public void testChangeBalance() throws URISyntaxException, IOException, InterruptedException {
+    public void afterPostingTransaction_BalanceShouldChangeByTransactionAmount() throws URISyntaxException, IOException, InterruptedException {
         int transaction = 100;
         String clientId = postClient();
 
@@ -120,7 +107,7 @@ public class AcceptanceTest {
     }
 
     @Test
-    public void testBalanceNotNegative() throws IOException, URISyntaxException, InterruptedException {
+    public void testIfTransactionMakesBalanceNegative_TransactionFailBalanceNotChanging() throws IOException, URISyntaxException, InterruptedException {
         int firstTransaction = 10;
         int secondTransaction = -100;
 

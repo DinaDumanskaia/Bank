@@ -1,3 +1,4 @@
+
 const e = React.createElement;
 
 class NameForm extends React.Component {
@@ -19,9 +20,6 @@ class NameForm extends React.Component {
     this.handleChangeBalance = this.handleChangeBalance.bind(this);
     this.handleSubmitBalanceModify = this.handleSubmitBalanceModify.bind(this);
   }
-
-
-
 
   handleChangeId(event) {
     this.setState({value: event.target.value});
@@ -63,34 +61,37 @@ class NameForm extends React.Component {
 
   render() {
     return (
-       <div>
+      <div>
+       <br />
+         <h1 className="hello">Добро пожаловать в <br /> Рашнбанк диджитал Кассир систем</h1>
        <br />
          <form onSubmit={this.handleSubmitCreate}>
-           <input type="submit" value="Create a new client" />
+           <input type="submit" value="Создать клиента" />
          </form>
+       <br />
+         <h2>Здравствуйте, {this.state.clientId}</h2>
+         <h3>Ваш баланс: {this.state.balance}</h3>
+       <br />
          <form onSubmit={this.handleSubmitGetClient}>
-         <label>
-           Input id:
-             <input type="text" value={this.state.value} onChange={this.handleChangeId} />
-          </label>
-           <input type="submit" value="Get client" />
+           <label>
+             Введите идентификатор клиента:
+               <input type="text" value={this.state.value} onChange={this.handleChangeId} />
+           </label>
+           <input type="submit" value="Найти клиента" />
          </form>
-         <br />
-         <h1>Здравствуйте, {this.state.clientId}</h1>
-         <h2>Ваш баланс: {this.state.balance}</h2>
-
-        <form onSubmit={this.handleSubmitBalanceModify}>
-            <label>
-              Change balance:
-              <input type="text" value={this.state.value1} onChange={this.handleChangeBalance} />
-            </label>
-            <input type="submit" value="GO" />
-          </form>
-
-         <h1>{this.state.clientId2}</h1>
-         <h2>{this.state.balance2}</h2>
-        </div>
-
+       <br />
+         <h2>Клиент : {this.state.clientId2}</h2>
+         <h3>Баланс : {this.state.balance2}</h3>
+       <br />
+         <form onSubmit={this.handleSubmitBalanceModify}>
+           <label>
+             Изменить баланс:
+               <input type="text" value={this.state.value1} onChange={this.handleChangeBalance} />
+           </label>
+           <input type="submit" value="Перевести" />
+         </form>
+       <br />
+       </div>
     );
   }
 }

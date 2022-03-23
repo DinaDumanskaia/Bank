@@ -8,9 +8,21 @@
 
     <!-- Don't use this in production: -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="stylesNew.css" type="text/css"/>
 </head>
+
 <body>
     <div id="root"></div>
     <script type="text/babel" src="button_test.js"></script>
+    <form action=/transactionProcessing>
+        Input client id: <input type="text" name="id"/>
+        <br/>
+        Money amount: <input type="text" name="transaction"/>
+        <br/>
+        <input type="submit" value="Transfer">
+    </form>
 </body>
 </html>

@@ -1,8 +1,10 @@
 
 const e = React.createElement;
 
-function AAAAA(props) {
-  return <h1>Hello, {props.uuid}</h1>;
+class AAAAA extends React.Component {
+render() {
+    return <h1>Hello, {this.props.uuid}</h1>;
+  }
 }
 
 class NameForm extends React.Component {

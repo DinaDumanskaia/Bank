@@ -1,35 +1,75 @@
 
 const e = React.createElement;
 
-class AAAAA extends React.Component {
+class ClientPage extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+
+    this.handleChangeBalance = this.handleChangeBalance.bind(this);
+    this.handleSubmitBalanceModify = this.handleSubmitBalanceModify.bind(this);
+
+  }
+
+    handleSubmitBalanceModify(event) {
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount: this.state.value1 })
+        };
+        fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId + '/transactions/', requestOptions);
+        event.preventDefault();
+    }
+
+  handleChangeBalance(event) {
+    this.setState({value1: event.target.value});
+  }
+
+  ClientInfo() {
+    return (
+        <div>
+            <br />
+                <h2>Здравствуйте, {this.props.clientId}</h2>
+                <h3>Ваш баланс: {this.props.balance}</h3>
+            <br />
+            <br />
+                <form onSubmit={this.handleSubmitBalanceModify}>
+                    <label>
+                        Изменить баланс:
+                        <input type="text" value={this.state.value1} onChange={this.handleChangeBalance} />
+                    </label>
+                    <input type="submit" value="Перевести" />
+                </form>
+            <br />
+        </div>
+        );
+    }
+
+
 render() {
-    return <h1>Hello, {this.props.uuid}</h1>;
+    return (
+    <div>
+        {this.ClientInfo()}
+    </div>
+    );
   }
 }
 
-class NameForm extends React.Component {
+class MainPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
         value: '',
         balance: null,
         clientId: null,
-        balance2: null,
-        clientId2: null,
         kek: null,
-        uuid: '123'
     };
 
     this.handleSubmitCreate = this.handleSubmitCreate.bind(this);
 
-    this.handleSubmitKEK = this.handleSubmitKEK.bind(this);
 
     this.handleSubmitGetClient = this.handleSubmitGetClient.bind(this);
     this.handleChangeId = this.handleChangeId.bind(this);
-
-    this.handleChangeBalance = this.handleChangeBalance.bind(this);
-    this.handleSubmitBalanceModify = this.handleSubmitBalanceModify.bind(this);
-
   }
 
   handleChangeId(event) {
@@ -37,6 +77,7 @@ class NameForm extends React.Component {
  }
 
   handleSubmitCreate(event) {
+    this.setState({kek: true});
     const requestOptions = {
         method: 'POST',
     };
@@ -46,36 +87,17 @@ class NameForm extends React.Component {
     event.preventDefault();
   }
 
-  handleSubmitKEK(event) {
-//    this.setState({kek: true});
-    this.setState({uuid: '456'});
-    event.preventDefault();
-  }
-
-  handleSubmitBalanceModify(event) {
-      const requestOptions = {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: this.state.value1 })
-
-      };
-      fetch('http://localhost:8080/bank/v1/clients/' + this.state.value + '/transactions/', requestOptions);
-      event.preventDefault();
-    }
 
 
   handleSubmitGetClient(event) {
-            fetch('http://localhost:8080/bank/v1/clients/' + this.state.value)
+      this.setState({kek: true});
+      fetch('http://localhost:8080/bank/v1/clients/' + this.state.value)
             .then(response => response.json())
-            .then(data => this.setState({ clientId2: data.id, balance2: data.balance }));
+            .then(data => this.setState({ clientId: data.id, balance: data.balance }));
       event.preventDefault();
     }
 
-  handleChangeBalance(event) {
-     this.setState({value1: event.target.value});
-  }
-
-  lol() {
+  main() {
     return (
           <div>
            <br />
@@ -85,14 +107,6 @@ class NameForm extends React.Component {
                <input type="submit" value="Создать клиента" />
              </form>
            <br />
-           <br />
-             <form onSubmit={this.handleSubmitKEK}>
-               <input type="submit" value="KEK" />
-             </form>
-           <br />
-             <h2>Здравствуйте, {this.state.clientId}</h2>
-             <h3>Ваш баланс: {this.state.balance}</h3>
-           <br />
              <form onSubmit={this.handleSubmitGetClient}>
                <label>
                  Введите идентификатор клиента:
@@ -100,35 +114,23 @@ class NameForm extends React.Component {
                </label>
                <input type="submit" value="Найти клиента" />
              </form>
-           <br />
-             <h2>Клиент : {this.state.clientId2}</h2>
-             <h3>Баланс : {this.state.balance2}</h3>
-           <br />
-             <form onSubmit={this.handleSubmitBalanceModify}>
-               <label>
-                 Изменить баланс:
-                   <input type="text" value={this.state.value1} onChange={this.handleChangeBalance} />
-               </label>
-               <input type="submit" value="Перевести" />
-             </form>
-           <br />
            </div>
         );
-    }
-
-    kek() {
-        return <AAAAA uuid={this.state.uuid} />;
     }
 
 
   render() {
     if (this.state.kek) {
-        return this.kek();
+        return (
+            <div>
+                <ClientPage clientId={this.state.clientId} balance={this.state.balance} />
+                {this.main()}
+            </div>
+        );
     }
     return (
     <div>
-        {this.kek()}
-        {this.lol()}
+        {this.main()}
     </div>
     );
 
@@ -140,7 +142,7 @@ class NameForm extends React.Component {
 
 ReactDOM.render(
     <div>
-        <NameForm />
+        <MainPage />
     </div>,
     document.getElementById('root')
 );

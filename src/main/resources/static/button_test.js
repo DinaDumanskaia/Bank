@@ -4,12 +4,22 @@ const e = React.createElement;
 class ClientPage extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+        clientId : props.clientId,
+        balance : props.balance
+    };
 
     this.handleChangeBalance = this.handleChangeBalance.bind(this);
     this.handleSubmitBalanceModify = this.handleSubmitBalanceModify.bind(this);
 
   }
+
+    componentDidUpdate() {
+        fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId)
+            .then(response => response.json())
+            .then(data => this.setState({ clientId: data.id, balance: data.balance }));
+    }
+
 
     handleSubmitBalanceModify(event) {
         const requestOptions = {
@@ -29,8 +39,8 @@ class ClientPage extends React.Component {
     return (
         <div>
             <br />
-                <h2>Здравствуйте, {this.props.clientId}</h2>
-                <h3>Ваш баланс: {this.props.balance}</h3>
+                <h2>Здравствуйте, {this.state.clientId}</h2>
+                <h3>Ваш баланс: {this.state.balance}</h3>
             <br />
             <br />
                 <form onSubmit={this.handleSubmitBalanceModify}>

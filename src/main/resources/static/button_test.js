@@ -10,7 +10,7 @@ class ClientPage extends React.Component {
     this.state = {
         clientId : props.clientId,
         balance : props.balance,
-        foo: null,
+        buttonTransaction: false,
         value3 : '',
         transactions: []
     };
@@ -18,7 +18,8 @@ class ClientPage extends React.Component {
     this.handleChangeBalance = this.handleChangeBalance.bind(this);
     this.handleSubmitBalanceModify = this.handleSubmitBalanceModify.bind(this);
 
-this.handleSubmitGetTransaction = this.handleSubmitGetTransaction.bind(this);
+    this.handleSubmitGetTransaction = this.handleSubmitGetTransaction.bind(this);
+    this.printTransactions = this.printTransactions.bind(this);
   }
 
 
@@ -46,26 +47,29 @@ this.handleSubmitGetTransaction = this.handleSubmitGetTransaction.bind(this);
 
 
       handleSubmitGetTransaction(event) {
-          this.setState({foo: true});
+          this.setState({buttonTransaction: true});
           fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId + '/transactions/')
                 .then(res => res.json())
                 .then(res => res.map(transaction => transaction.amount))
                 .then(transactionAmounts => this.setState({transactions : transactionAmounts}));
-   }
+      }
 
        handleChangeId(event) {
           this.setState({value3: event.target.value});
-        }
+       }
 
 
 
   ClientInfo() {
     return (
         <div>
+          <div style={{background: "#8ED9B6", borderRadius: "15px", float: "right", width: "500px", padding: "10px", boxSizing: "border-box", textAlign: "center" }}>
             <br />
-                <h2>Здравствуйте, {this.state.clientId}</h2>
+                <h2>Клиент</h2>
+                <h3>ИД: {this.state.clientId}</h3>
                 <h3>Ваш баланс: {this.state.balance}</h3>
             <br />
+            </div>
             <br />
                 <form onSubmit={this.handleSubmitBalanceModify}>
                     <label>
@@ -77,46 +81,41 @@ this.handleSubmitGetTransaction = this.handleSubmitGetTransaction.bind(this);
             <br />
                 <form onSubmit={this.handleSubmitGetTransaction}>
                 <label>
-                    Запросить foo:
+                    Запросить выписку:
                 </label>
-                    <input type="submit" value="FOO" />
+                    <input type="submit" value="Получить"/>
                 </form>
         </div>
         );
     }
 
 
-    Transactions() {
+    printTransactions() {
         return (
-            <div>
-                <br />
-                    <form onSubmit={this.handleSubmitGetTransaction}>
-                    <label>
-                        Запросить foo:
-                    </label>
-                        <input type="submit" value="FOO" />
-                    </form>
-            </div>
-            );
+            <ul>
+            {this.state.transactions.map(item => {
+            return <li>{item}</li>;
+            })}
+            </ul>
+        );
+    }
+
+       printTransactions2() {
+            return ('Hello');
         }
-//
-//              <ul>
-//                {this.state.transactions.map(item => {
-//                  return <li>{item}</li>;
-//                })}
-//              </ul>
+
 render() {
 
 
-    if (this.state.foo) {
-        return (
-            <ul>
-                {this.state.transactions.map(item => {
-                return <li>{item}</li>;
-                })}
-            </ul>
+    if (this.state.buttonTransaction) {
+    return (
+    <div>
 
-            );
+    {this.printTransactions()}
+    {this.ClientInfo()}
+
+    </div>
+    );
     }
 
     return (
@@ -124,6 +123,7 @@ render() {
         {this.ClientInfo()}
     </div>
     );
+
   }
 }
 
@@ -138,7 +138,6 @@ class MainPage extends React.Component {
     };
 
     this.handleSubmitCreate = this.handleSubmitCreate.bind(this);
-
     this.handleSubmitGetClient = this.handleSubmitGetClient.bind(this);
     this.handleChangeId = this.handleChangeId.bind(this);
   }
@@ -172,19 +171,23 @@ class MainPage extends React.Component {
     return (
           <div>
            <br />
-             <h1 className="hello">Добро пожаловать в <br /> Рашнбанк диджитал Кассир систем</h1>
+             <h1 className="hello" style={{borderRadius: "15px", float: "none", width: "1200px", padding: "10px", boxSizing: "border-box", position: "relative", textAlign: "center" }}>
+                        РашнБанк Диджитал Кассир Систем</h1>
            <br />
+           <div style={{background: "#FF9282", borderRadius: "15px", float: "left", width: "500px", padding: "10px", boxSizing: "border-box", textAlign: "center" }}>
              <form onSubmit={this.handleSubmitCreate}>
                <input type="submit" value="Создать клиента" />
              </form>
            <br />
              <form onSubmit={this.handleSubmitGetClient}>
-               <label>
+               <label style={{borderRadius: "15px"}}>
+               <input type="submit" value="Найти клиента" />
+               <br />
                  ИД:
                    <input type="text" value={this.state.value} onChange={this.handleChangeId} />
                </label>
-               <input type="submit" value="Найти клиента" />
              </form>
+             </div>
            </div>
         );
     }

@@ -106,6 +106,7 @@ ClientInfo() {
                         {this.ClientInfo()}
                     </div>
                     <div class="transactions">
+                        Транзакции:
                         {this.printTransactions()}
                     </div>
                 </div>
@@ -174,10 +175,10 @@ class MainPage extends React.Component {
                 <br />
                 <form onSubmit={this.handleSubmitGetClient}>
                     <label style={{borderRadius: "15px"}}>
-                    <input type="submit" value="Найти клиента" />
                     <br />
                     ИД:
                     <input type="text" value={this.state.value} onChange={this.handleChangeId} />
+                    <input type="submit" value="Найти клиента" />
                     </label>
                 </form>
             </div>

@@ -46,85 +46,78 @@ class ClientPage extends React.Component {
 
 
 
-      handleSubmitGetTransaction(event) {
-          this.setState({buttonTransaction: true});
-          fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId + '/transactions/')
-                .then(res => res.json())
-                .then(res => res.map(transaction => transaction.amount))
-                .then(transactionAmounts => this.setState({transactions : transactionAmounts}));
-      }
+    handleSubmitGetTransaction(event) {
+        this.setState({buttonTransaction: true});
+        fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId + '/transactions/')
+            .then(res => res.json())
+            .then(res => res.map(transaction => transaction.amount))
+            .then(transactionAmounts => this.setState({transactions : transactionAmounts}));
+    }
 
-       handleChangeId(event) {
-          this.setState({value3: event.target.value});
-       }
+    handleChangeId(event) {
+        this.setState({value3: event.target.value});
+    }
 
 
 
-  ClientInfo() {
+ClientInfo() {
     return (
-        <div>
-          <div style={{background: "#8ED9B6", borderRadius: "15px", float: "right", width: "500px", padding: "10px", boxSizing: "border-box", textAlign: "center" }}>
-            <br />
+        <div class="row">
+            <div class="column">
                 <h2>Клиент</h2>
                 <h3>ИД: {this.state.clientId}</h3>
-                <h3>Ваш баланс: {this.state.balance}</h3>
-            <br />
+                <h3>Баланс: {this.state.balance}</h3>
             </div>
-            <br />
+            <div class="column">
                 <form onSubmit={this.handleSubmitBalanceModify}>
-                    <label>
+                    <h3>
                         Изменить баланс:
                         <input type="text" value={this.state.value1} onChange={this.handleChangeBalance} />
-                    </label>
+                    </h3>
                     <input type="submit" value="Перевести" />
                 </form>
-            <br />
-                <form onSubmit={this.handleSubmitGetTransaction}>
-                <label>
-                    Запросить выписку:
-                </label>
+                    <form onSubmit={this.handleSubmitGetTransaction}>
+                    <h3>
+                        Запросить выписку:
+                    </h3>
                     <input type="submit" value="Получить"/>
                 </form>
+            </div>
         </div>
-        );
-    }
+    );
+}
 
 
     printTransactions() {
         return (
             <ul>
-            {this.state.transactions.map(item => {
-            return <li>{item}</li>;
-            })}
+                {this.state.transactions.map(item => {
+                    return <li>{item}</li>;
+                })}
             </ul>
         );
     }
 
-       printTransactions2() {
-            return ('Hello');
+    render() {
+        if (this.state.buttonTransaction) {
+            return (
+                <div>
+                    <div>
+                        {this.ClientInfo()}
+                    </div>
+                    <div class="transactions">
+                        {this.printTransactions()}
+                    </div>
+                </div>
+            );
         }
 
-render() {
-
-
-    if (this.state.buttonTransaction) {
-    return (
-    <div>
-
-    {this.printTransactions()}
-    {this.ClientInfo()}
-
-    </div>
-    );
+        return (
+            <div>
+                {this.ClientInfo()}
+            </div>
+        );
     }
-
-    return (
-    <div>
-        {this.ClientInfo()}
-    </div>
-    );
-
-  }
 }
 
 class MainPage extends React.Component {
@@ -169,26 +162,26 @@ class MainPage extends React.Component {
 
   main() {
     return (
-          <div>
-           <br />
-             <h1 className="hello" style={{borderRadius: "15px", float: "none", width: "1200px", padding: "10px", boxSizing: "border-box", position: "relative", textAlign: "center" }}>
-                        РашнБанк Диджитал Кассир Систем</h1>
-           <br />
-           <div style={{background: "#FF9282", borderRadius: "15px", float: "left", width: "500px", padding: "10px", boxSizing: "border-box", textAlign: "center" }}>
-             <form onSubmit={this.handleSubmitCreate}>
-               <input type="submit" value="Создать клиента" />
-             </form>
-           <br />
-             <form onSubmit={this.handleSubmitGetClient}>
-               <label style={{borderRadius: "15px"}}>
-               <input type="submit" value="Найти клиента" />
-               <br />
-                 ИД:
-                   <input type="text" value={this.state.value} onChange={this.handleChangeId} />
-               </label>
-             </form>
-             </div>
-           </div>
+        <div>
+            <div class="header">
+                <h1>РашнБанк</h1>
+                <h5>ДИДЖИТАЛ КАССИР СИСТЕМ</h5>
+            </div>
+            <div class="header">
+                <form onSubmit={this.handleSubmitCreate}>
+                    <input type="submit" value="Создать клиента" />
+                </form>
+                <br />
+                <form onSubmit={this.handleSubmitGetClient}>
+                    <label style={{borderRadius: "15px"}}>
+                    <input type="submit" value="Найти клиента" />
+                    <br />
+                    ИД:
+                    <input type="text" value={this.state.value} onChange={this.handleChangeId} />
+                    </label>
+                </form>
+            </div>
+        </div>
         );
     }
 
@@ -197,15 +190,15 @@ class MainPage extends React.Component {
     if (this.state.buttonCreate) {
         return (
             <div>
-                <ClientPage clientId={this.state.clientId} balance={this.state.balance} />
                 {this.main()}
+                <ClientPage clientId={this.state.clientId} balance={this.state.balance} />
             </div>
         );
     }
     return (
-    <div>
-        {this.main()}
-    </div>
+        <div>
+            {this.main()}
+        </div>
     );
 
   }

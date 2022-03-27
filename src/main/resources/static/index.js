@@ -131,17 +131,15 @@ class ClientPage extends React.Component {
         };
 
         const response = await fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId + '/transactions/', requestOptions);
-        if (response.ok) {
-            const data = await response.json();
-            this.setState({ clientId: data.id, balance: data.balance });
-        } else {
+        if (!response.ok) {
             await showError(response);
+            return;
         }
 
         this.setState({ value1: '' });
-        await fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId)
-            .then(response => response.json())
-            .then(data => this.setState({ clientId: data.id, balance: data.balance }));
+        const balanceResponse = await fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId);
+        const data = await balanceResponse.json();
+        this.setState({ clientId: data.id, balance: data.balance });
     }
 
     handleChangeBalance(event) {
@@ -211,7 +209,7 @@ ClientInfo() {
                         {this.ClientInfo()}
                     </div>
                     <div className="transactions">
-                    Транзакции:
+                    {this.state.transactions.length ? 'Транзакции:' : 'Транзакций нет'}
                         {this.printTransactions()}
                     </div>
                 </div>

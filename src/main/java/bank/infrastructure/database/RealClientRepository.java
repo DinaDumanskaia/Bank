@@ -1,5 +1,6 @@
 package bank.infrastructure.database;
 
+import bank.application.IllegalClientIdException;
 import bank.application.RepositoryError;
 import bank.domain.Client;
 import bank.application.ClientNotFoundException;
@@ -39,7 +40,9 @@ public class RealClientRepository implements ClientRepository {
     }
 
     @Override
-    public Client getClientById(UUID clientId) {
+    public Client getClientById(UUID clientId) throws IllegalClientIdException {
+        if(clientId == null)
+            throw new IllegalClientIdException("Client id shouldn't be null or empty");
         try {
             ResultSet resultSet = queryClientData(clientId);
             throwIfNoClient(resultSet.next());

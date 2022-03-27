@@ -1,5 +1,6 @@
 package DataBase;
 
+import bank.application.IllegalClientIdException;
 import bank.domain.Client;
 import bank.application.ClientNotFoundException;
 import bank.application.ClientRepository;
@@ -24,12 +25,12 @@ public class RepositoryTest {
     }
 
     @Test(expected = ClientNotFoundException.class)
-    public void testGetNotExistingClient() {
+    public void testGetNotExistingClient() throws IllegalClientIdException {
         repository.getClientById(UUID.randomUUID());
     }
 
     @Test
-    public void testClientEqualsRepositoryClient() {
+    public void testClientEqualsRepositoryClient() throws IllegalClientIdException {
         Client client = new Client();
         client.changeBalance(200, Currency.RUB, new Date());
         repository.saveClient(client);
@@ -45,7 +46,7 @@ public class RepositoryTest {
     }
 
     @Test
-    public void testClientHasTwoTransactions() {
+    public void testClientHasTwoTransactions() throws IllegalClientIdException {
         Client client = new Client();
         client.changeBalance(200, Currency.RUB, new Date());
         client.changeBalance(50, Currency.RUB, new Date());
@@ -55,7 +56,7 @@ public class RepositoryTest {
     }
 
     @Test
-    public void testEmptyClient() {
+    public void testEmptyClient() throws IllegalClientIdException {
         Client client = new Client();
         repository.saveClient(client);
 
@@ -68,7 +69,7 @@ public class RepositoryTest {
     }
 
     @Test
-    public void secondTransactionShouldBeDifferent() {
+    public void secondTransactionShouldBeDifferent() throws IllegalClientIdException {
         Client client = new Client();
         repository.saveClient(client);
         client.changeBalance(10, Currency.RUB, new Date());

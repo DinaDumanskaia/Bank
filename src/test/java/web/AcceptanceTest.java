@@ -63,8 +63,15 @@ public class AcceptanceTest {
 
     private static void runApp() {
         try {
-            Process exec = Runtime.getRuntime().exec("cmd /c mvn exec:java");
-            outputLines(exec.getErrorStream()).forEach(System.out::println);
+            Process proc = Runtime.getRuntime().exec("cmd /c mvn exec:java");
+
+            ProcessHandler inputStream = new ProcessHandler(proc.getInputStream(), "INPUT");
+            ProcessHandler errorStream = new ProcessHandler(proc.getErrorStream(), "ERROR");
+            /* start the stream threads */
+            inputStream.start();
+            errorStream.start();
+
+            //outputLines(proc.getErrorStream()).forEach(System.out::println);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -224,6 +231,30 @@ public class AcceptanceTest {
 
     private String createJSONChangeBalanceRequestBody(int transaction) {
         return "{\"amount\":\"" + transaction + "\"}";
+    }
+
+    static class ProcessHandler extends Thread {
+        InputStream inputStream;
+        String streamType;
+
+        public ProcessHandler(InputStream inputStream, String streamType) {
+            this.inputStream = inputStream;
+            this.streamType = streamType;
+        }
+
+        public void run() {
+            try {
+                InputStreamReader inpStrd = new InputStreamReader(inputStream);
+                BufferedReader buffRd = new BufferedReader(inpStrd);
+                String line = null;
+                while ((line = buffRd.readLine()) != null) {
+                    System.out.println(streamType+ "::" + line);
+                }
+                buffRd.close();
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        }
     }
 
 }

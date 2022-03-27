@@ -7,7 +7,7 @@ import java.util.UUID;
 public interface ClientRepository {
     boolean clientExists(UUID clientId);
 
-    Client getClientById(UUID id);
+    Client getClientById(UUID id) throws IllegalClientIdException;
 
     void saveClient(Client client);
 

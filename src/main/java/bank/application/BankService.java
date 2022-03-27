@@ -32,11 +32,11 @@ public class BankService {
         return clientRepository.clientExists(clientId);
     }
 
-    public void transferMoney(UUID sender, UUID recipient, int value) throws Exception {
+    public void transferMoney(UUID sender, UUID recipient, int value) throws Exception, IllegalClientIdException {
         transferMoney(sender, recipient, value, Currency.RUB);
     }
 
-    public void transferMoney(UUID sender, UUID recipient, int value, Currency currency) throws Exception {
+    public void transferMoney(UUID sender, UUID recipient, int value, Currency currency) throws Exception, IllegalClientIdException {
         checkTransferAbility(sender, recipient);
         makeTransfer(sender, recipient, value, currency);
     }
@@ -47,36 +47,36 @@ public class BankService {
         }
     }
 
-    private void makeTransfer(UUID sender, UUID recipient, int value, Currency currency) {
+    private void makeTransfer(UUID sender, UUID recipient, int value, Currency currency) throws IllegalClientIdException {
         Client clientFrom = clientRepository.getClientById(sender);
         Client clientTo = clientRepository.getClientById(recipient);
         clientFrom.changeBalance(-1 * value, currency, dateProvider.getDate());
         clientTo.changeBalance(value, currency, dateProvider.getDate());
     }
 
-    public Client getClientById(UUID id) {
+    public Client getClientById(UUID id) throws IllegalClientIdException {
         return clientRepository.getClientById(id);
     }
 
-    public void changeBalance(UUID id, Currency currency, int value) {
+    public void changeBalance(UUID id, Currency currency, int value) throws IllegalClientIdException {
         Client client = clientRepository.getClientById(id);
         client.changeBalance(value, currency, dateProvider.getDate());
         clientRepository.saveClient(client);
     }
 
-    public void changeBalance(UUID id, int value) {
+    public void changeBalance(UUID id, int value) throws IllegalClientIdException {
         changeBalance(id, Currency.RUB, value);
     }
 
-    public int getBalance(UUID id, Currency currency) {
+    public int getBalance(UUID id, Currency currency) throws IllegalClientIdException {
         return clientRepository.getClientById(id).getMoneyAccountBalance(currency);
     }
 
-    public int getBalance(UUID id) {
+    public int getBalance(UUID id) throws IllegalClientIdException {
         return getBalance(id, Currency.RUB);
     }
 
-    public List<Transaction> getTransactions(UUID id) {
+    public List<Transaction> getTransactions(UUID id) throws IllegalClientIdException {
         return clientRepository.getClientById(id).getListOfTransactions();
     }
 

@@ -1,6 +1,7 @@
 package bank.infrastructure.web;
 
 import bank.application.BankService;
+import bank.application.IllegalClientIdException;
 import bank.domain.Client;
 import bank.application.RepositoryError;
 import bank.infrastructure.web.dto.ClientDto;
@@ -27,20 +28,33 @@ public class BankController {
         return new ResponseEntity<>(ClientDto.toDto(client), HttpStatus.CREATED);
     }
 
-    @GetMapping("/bank/v1/clients/{clientId}")
-    public ClientDto getClient(@PathVariable("clientId") UUID clientId) {
-        Client client = bankService.getClientById(clientId);
-        return ClientDto.toDto(client);
-    }
-
     @PostMapping("/bank/v1/clients/{clientId}/transactions/")
-    public ResponseEntity<Void> changeBalance(@PathVariable("clientId") UUID clientId, @RequestBody MoneyDto transaction) throws Exception {
+    public ResponseEntity<Void> changeBalance(@PathVariable("clientId") UUID clientId, @RequestBody MoneyDto transaction) throws IllegalClientIdException {
         bankService.changeBalance(clientId, transaction.getAmount());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+/*    @GetMapping("/bank/v1/clients/{clientId}")
+    public ClientDto getClient(@PathVariable("clientId") UUID clientId) throws IllegalClientIdException {
+        Client client = bankService.getClientById(clientId);
+        return ClientDto.toDto(client);
+    }*/
+
+    @GetMapping("/bank/v1/clients/{clientId}")
+    public ClientDto getClient(@PathVariable("clientId") String uuidStr) throws IllegalClientIdException {
+        UUID clientId = null;
+        try {
+            clientId = UUID.fromString(uuidStr);
+        } catch (IllegalArgumentException iae) {
+            throw new IllegalClientIdException("ABC");
+        }
+
+        Client client = bankService.getClientById(clientId);
+        return ClientDto.toDto(client);
+    }
+
     @GetMapping("/bank/v1/clients/{clientId}/transactions/")
-    public List<TransactionDto> getListOfTransactions(@PathVariable("clientId") UUID clientId) {
+    public List<TransactionDto> getListOfTransactions(@PathVariable("clientId") UUID clientId) throws IllegalClientIdException {
         return bankService.getTransactions(clientId)
                 .stream().map(TransactionDto::toDto)
                 .collect(Collectors.toList());

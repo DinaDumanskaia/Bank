@@ -1,6 +1,7 @@
 package bank;
 
 import bank.application.BankService;
+import bank.application.IllegalClientIdException;
 import bank.domain.Client;
 import bank.application.ClientNotFoundException;
 import bank.domain.Currency;
@@ -21,7 +22,7 @@ public class BankServiceTests {
     private final UUID clientId2 = bankService.createNewClient().getID();
 
     @Test
-    public void testChangeBalanceInRUB() {
+    public void testChangeBalanceInRUB() throws IllegalClientIdException {
         int rubleBalance = 100;
         bankService.changeBalance(clientId1, bank.domain.Currency.RUB, rubleBalance);
 
@@ -29,7 +30,7 @@ public class BankServiceTests {
     }
 
     @Test
-    public void testGetClient() throws Exception {
+    public void testGetClient() throws Exception, IllegalClientIdException {
         int rubleBalance = 100;
         bankService.changeBalance(clientId1, bank.domain.Currency.RUB, rubleBalance);
         Client client = bankService.getClientById(clientId1);
@@ -38,7 +39,7 @@ public class BankServiceTests {
     }
 
     @Test
-    public void testChangeBalanceInUSD() throws Exception {
+    public void testChangeBalanceInUSD() throws Exception, IllegalClientIdException {
         int usdBalance = 70;
         bankService.changeBalance(clientId1, Currency.USD, usdBalance);
 
@@ -46,7 +47,7 @@ public class BankServiceTests {
     }
 
     @Test
-    public void testChangeBalanceInEUR() throws Exception {
+    public void testChangeBalanceInEUR() throws Exception, IllegalClientIdException {
         int euroBalance = 50;
         bankService.changeBalance(clientId1, bank.domain.Currency.EUR, euroBalance);
 
@@ -54,7 +55,7 @@ public class BankServiceTests {
     }
 
     @Test
-    public void testGetTransactionsReturnACopy() throws Exception {
+    public void testGetTransactionsReturnACopy() throws Exception, IllegalClientIdException {
         bankService.changeBalance(clientId1, 50);
         bankService.changeBalance(clientId1, 100);
 
@@ -66,7 +67,7 @@ public class BankServiceTests {
     }
 
     @Test
-    public void testTransactionDate() throws Exception {
+    public void testTransactionDate() throws Exception, IllegalClientIdException {
         bankService.changeBalance(clientId1, 50);
 
         List<Transaction> listOfTransactions = bankService.getTransactions(clientId1);
@@ -82,24 +83,24 @@ public class BankServiceTests {
     }
 
     @Test(expected = ClientNotFoundException.class)
-    public void testClientNotFound() {
+    public void testClientNotFound() throws IllegalClientIdException {
         bankService.getClientById(UUID.randomUUID());
     }
 
     @Test
-    public void testDefaultBalance() {
+    public void testDefaultBalance() throws IllegalClientIdException {
         assertEquals(0, bankService.getBalance(clientId1));
     }
 
     @Test
-    public void testBalanceIncrement() throws Exception {
+    public void testBalanceIncrement() throws Exception, IllegalClientIdException {
         bankService.changeBalance(clientId1, 100);
 
         Assert.assertEquals(100, bankService.getBalance(clientId1));
     }
 
     @Test
-    public void testBalanceIncr100Decr20() throws Exception {
+    public void testBalanceIncr100Decr20() throws Exception, IllegalClientIdException {
         bankService.changeBalance(clientId1, 100);
         bankService.changeBalance(clientId1, -20);
 
@@ -107,13 +108,13 @@ public class BankServiceTests {
     }
 
     @Test(expected = NegativeBalanceException.class)
-    public void testOverdraft() throws Exception {
+    public void testOverdraft() throws Exception, IllegalClientIdException {
         bankService.changeBalance(clientId1, 200);
         bankService.changeBalance(clientId1, -300);
     }
 
     @Test
-    public void testAccountStatement() throws Exception {
+    public void testAccountStatement() throws Exception, IllegalClientIdException {
         bankService.changeBalance(clientId1, 200);
         bankService.changeBalance(clientId1, -100);
         bankService.changeBalance(clientId1, 50);
@@ -132,7 +133,7 @@ public class BankServiceTests {
     }
 
     @Test
-    public void testAccountStatement2() throws Exception {
+    public void testAccountStatement2() throws Exception, IllegalClientIdException {
         bankService.changeBalance(clientId1, 100);
         bankService.changeBalance(clientId1, -50);
         bankService.changeBalance(clientId2, 200);
@@ -144,13 +145,13 @@ public class BankServiceTests {
     }
 
     @Test
-    public void testWhenBalanceOf1stClientIncreasesBy100TheBalanceOfSecondIs0() throws Exception {
+    public void testWhenBalanceOf1stClientIncreasesBy100TheBalanceOfSecondIs0() throws Exception, IllegalClientIdException {
         bankService.changeBalance(clientId1, 100);
         Assert.assertEquals(0, bankService.getBalance(clientId2));
     }
 
     @Test
-    public void testFirstClientBalanceAfterTransferringMoney() throws Exception {
+    public void testFirstClientBalanceAfterTransferringMoney() throws Exception, IllegalClientIdException {
         bankService.changeBalance(clientId1, 100);
         bankService.transferMoney(clientId1, clientId2, 30);
 
@@ -158,7 +159,7 @@ public class BankServiceTests {
     }
 
     @Test
-    public void testSecondClientBalanceAfterReceivingMoney() throws Exception {
+    public void testSecondClientBalanceAfterReceivingMoney() throws Exception, IllegalClientIdException {
         bankService.changeBalance(clientId1, 100);
         bankService.transferMoney(clientId1, clientId2, 30);
 

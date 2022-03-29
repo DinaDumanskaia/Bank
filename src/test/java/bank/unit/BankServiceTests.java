@@ -1,14 +1,12 @@
-package bank;
+package bank.unit;
 
 import bank.application.BankService;
-import bank.application.IllegalClientIdException;
+import bank.application.exceptions.IllegalClientIdException;
 import bank.domain.Client;
-import bank.application.ClientNotFoundException;
+import bank.application.exceptions.ClientNotFoundException;
 import bank.domain.Currency;
 import bank.domain.NegativeBalanceException;
 import bank.domain.Transaction;
-import bank.infrastructure.database.FakeClientRepository;
-import bank.infrastructure.database.RealClientRepository;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -74,7 +72,7 @@ public class BankServiceTests {
         Transaction lastTransaction = listOfTransactions.get(listOfTransactions.size() - 1);
         Date date = lastTransaction.getDate();
 
-        Assert.assertEquals(FakeDateProviderImpl.DATE, date);
+        assertEquals(FakeDateProviderImpl.DATE, date);
     }
 
     @Test

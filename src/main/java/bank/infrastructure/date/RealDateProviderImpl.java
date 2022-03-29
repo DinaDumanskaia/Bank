@@ -1,6 +1,6 @@
 package bank.infrastructure.date;
 
-import bank.application.DateProvider;
+import bank.application.adapters.DateProvider;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;

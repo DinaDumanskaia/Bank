@@ -1,9 +1,9 @@
 package bank.infrastructure.web;
 
-import bank.application.ClientNotFoundException;
-import bank.application.IllegalClientIdException;
+import bank.application.exceptions.ClientNotFoundException;
+import bank.application.exceptions.IllegalClientIdException;
 import bank.domain.NegativeBalanceException;
-import bank.application.RepositoryError;
+import bank.application.exceptions.RepositoryError;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

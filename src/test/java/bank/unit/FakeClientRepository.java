@@ -1,8 +1,8 @@
-package bank.infrastructure.database;
+package bank.unit;
 
 import bank.domain.Client;
-import bank.application.ClientNotFoundException;
-import bank.application.ClientRepository;
+import bank.application.exceptions.ClientNotFoundException;
+import bank.application.adapters.ClientRepository;
 
 import java.util.ArrayList;
 import java.util.List;

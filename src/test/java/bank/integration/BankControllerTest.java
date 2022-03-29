@@ -1,4 +1,4 @@
-package bank;
+package bank.integration;
 
 import bank.infrastructure.web.dto.ClientDto;
 import bank.infrastructure.web.dto.MoneyDto;

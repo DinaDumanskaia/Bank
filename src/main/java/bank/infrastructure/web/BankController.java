@@ -1,9 +1,9 @@
 package bank.infrastructure.web;
 
 import bank.application.BankService;
-import bank.application.IllegalClientIdException;
+import bank.application.exceptions.IllegalClientIdException;
 import bank.domain.Client;
-import bank.application.RepositoryError;
+import bank.application.exceptions.RepositoryError;
 import bank.infrastructure.web.dto.ClientDto;
 import bank.infrastructure.web.dto.MoneyDto;
 import bank.infrastructure.web.dto.TransactionDto;
@@ -28,12 +28,6 @@ public class BankController {
         return new ResponseEntity<>(ClientDto.toDto(client), HttpStatus.CREATED);
     }
 
-    @PostMapping("/bank/v1/clients/{clientId}/transactions/")
-    public ResponseEntity<Void> changeBalance(@PathVariable("clientId") UUID clientId, @RequestBody MoneyDto transaction) throws IllegalClientIdException {
-        bankService.changeBalance(clientId, transaction.getAmount());
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
     @GetMapping("/bank/v1/clients/{clientId}")
     public ClientDto getClient(@PathVariable("clientId") String uuidStr) throws IllegalClientIdException {
         Client client = bankService.getClientById(getUuid(uuidStr));
@@ -46,6 +40,13 @@ public class BankController {
         } catch (IllegalArgumentException iae) {
             throw new IllegalClientIdException("Could not parse");
         }
+    }
+
+    @PostMapping("/bank/v1/clients/{clientId}/transactions/")
+    public ResponseEntity<Void> changeBalance(@PathVariable("clientId") UUID clientId, @RequestBody MoneyDto transaction)
+            throws IllegalClientIdException {
+        bankService.changeBalance(clientId, transaction.getAmount());
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping("/bank/v1/clients/{clientId}/transactions/")

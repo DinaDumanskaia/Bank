@@ -1,10 +1,10 @@
 package bank.infrastructure.database;
 
-import bank.application.IllegalClientIdException;
-import bank.application.RepositoryError;
+import bank.application.exceptions.IllegalClientIdException;
+import bank.application.exceptions.RepositoryError;
 import bank.domain.Client;
-import bank.application.ClientNotFoundException;
-import bank.application.ClientRepository;
+import bank.application.exceptions.ClientNotFoundException;
+import bank.application.adapters.ClientRepository;
 import bank.domain.Currency;
 import bank.domain.MoneyAccount;
 import bank.domain.Transaction;

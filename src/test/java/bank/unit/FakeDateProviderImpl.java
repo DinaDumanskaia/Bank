@@ -1,6 +1,6 @@
-package bank;
+package bank.unit;
 
-import bank.application.DateProvider;
+import bank.application.adapters.DateProvider;
 
 import java.util.Date;
 

@@ -1,9 +1,9 @@
-package DataBase;
+package bank.integration;
 
-import bank.application.IllegalClientIdException;
+import bank.application.exceptions.IllegalClientIdException;
 import bank.domain.Client;
-import bank.application.ClientNotFoundException;
-import bank.application.ClientRepository;
+import bank.application.exceptions.ClientNotFoundException;
+import bank.application.adapters.ClientRepository;
 import bank.domain.Currency;
 import bank.infrastructure.database.RealClientRepository;
 import org.junit.Assert;

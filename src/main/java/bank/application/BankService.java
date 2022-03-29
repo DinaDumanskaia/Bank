@@ -1,9 +1,11 @@
 package bank.application;
 
+import bank.application.adapters.ClientRepository;
+import bank.application.adapters.DateProvider;
+import bank.application.exceptions.IllegalClientIdException;
 import bank.domain.Client;
 import bank.domain.Currency;
 import bank.domain.Transaction;
-import bank.infrastructure.database.RealClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

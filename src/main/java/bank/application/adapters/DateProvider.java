@@ -1,4 +1,4 @@
-package bank.application;
+package bank.application.adapters;
 
 import java.util.Date;
 

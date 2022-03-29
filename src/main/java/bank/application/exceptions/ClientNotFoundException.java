@@ -1,4 +1,4 @@
-package bank.application;
+package bank.application.exceptions;
 
 public class ClientNotFoundException extends RuntimeException {
     public ClientNotFoundException(String message) {

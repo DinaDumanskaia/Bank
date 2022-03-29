@@ -147,20 +147,4 @@ public class BankServiceTests {
         bankService.changeBalance(clientId1, 100);
         Assert.assertEquals(0, bankService.getBalance(clientId2));
     }
-
-    @Test
-    public void testFirstClientBalanceAfterTransferringMoney() throws Exception, IllegalClientIdException {
-        bankService.changeBalance(clientId1, 100);
-        bankService.transferMoney(clientId1, clientId2, 30);
-
-        Assert.assertEquals(70, bankService.getBalance(clientId1));
-    }
-
-    @Test
-    public void testSecondClientBalanceAfterReceivingMoney() throws Exception, IllegalClientIdException {
-        bankService.changeBalance(clientId1, 100);
-        bankService.transferMoney(clientId1, clientId2, 30);
-
-        Assert.assertEquals(30, bankService.getBalance(clientId2));
-    }
 }

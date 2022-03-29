@@ -34,23 +34,18 @@ public class BankController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-/*    @GetMapping("/bank/v1/clients/{clientId}")
-    public ClientDto getClient(@PathVariable("clientId") UUID clientId) throws IllegalClientIdException {
-        Client client = bankService.getClientById(clientId);
-        return ClientDto.toDto(client);
-    }*/
-
     @GetMapping("/bank/v1/clients/{clientId}")
     public ClientDto getClient(@PathVariable("clientId") String uuidStr) throws IllegalClientIdException {
-        UUID clientId = null;
-        try {
-            clientId = UUID.fromString(uuidStr);
-        } catch (IllegalArgumentException iae) {
-            throw new IllegalClientIdException("ABC");
-        }
-
-        Client client = bankService.getClientById(clientId);
+        Client client = bankService.getClientById(getUuid(uuidStr));
         return ClientDto.toDto(client);
+    }
+
+    private UUID getUuid(String uuidStr) throws IllegalClientIdException {
+        try {
+            return UUID.fromString(uuidStr);
+        } catch (IllegalArgumentException iae) {
+            throw new IllegalClientIdException("Could not parse");
+        }
     }
 
     @GetMapping("/bank/v1/clients/{clientId}/transactions/")

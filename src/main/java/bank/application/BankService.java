@@ -35,29 +35,29 @@ public class BankService {
     }
 
 
-    public Client getClientById(UUID id) throws IllegalClientIdException {
+    public Client getClientById(UUID id) {
         return clientRepository.getClientById(id);
     }
 
-    public void changeBalance(UUID id, Currency currency, int value) throws IllegalClientIdException {
+    public void changeBalance(UUID id, Currency currency, int value) {
         Client client = clientRepository.getClientById(id);
         client.changeBalance(value, currency, dateProvider.getDate());
         clientRepository.saveClient(client);
     }
 
-    public void changeBalance(UUID id, int value) throws IllegalClientIdException {
+    public void changeBalance(UUID id, int value) {
         changeBalance(id, Currency.RUB, value);
     }
 
-    public int getBalance(UUID id, Currency currency) throws IllegalClientIdException {
+    public int getBalance(UUID id, Currency currency) {
         return clientRepository.getClientById(id).getMoneyAccountBalance(currency);
     }
 
-    public int getBalance(UUID id) throws IllegalClientIdException {
+    public int getBalance(UUID id) {
         return getBalance(id, Currency.RUB);
     }
 
-    public List<Transaction> getTransactions(UUID id) throws IllegalClientIdException {
+    public List<Transaction> getTransactions(UUID id) {
         return clientRepository.getClientById(id).getListOfTransactions();
     }
 

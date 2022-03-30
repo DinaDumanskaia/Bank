@@ -29,12 +29,15 @@ public class BankController {
     }
 
     @GetMapping("/bank/v1/clients/{clientId}")
-    public ClientDto getClient(@PathVariable("clientId") String uuidStr) throws IllegalClientIdException {
+    public ClientDto getClient(@PathVariable("clientId") String uuidStr) {
         Client client = bankService.getClientById(getUuid(uuidStr));
         return ClientDto.toDto(client);
     }
 
-    private UUID getUuid(String uuidStr) throws IllegalClientIdException {
+    private UUID getUuid(String uuidStr) {
+        if (uuidStr == null) {
+            throw new IllegalClientIdException("Client ID should not be empty");
+        }
         try {
             return UUID.fromString(uuidStr);
         } catch (IllegalArgumentException iae) {
@@ -43,14 +46,13 @@ public class BankController {
     }
 
     @PostMapping("/bank/v1/clients/{clientId}/transactions/")
-    public ResponseEntity<Void> changeBalance(@PathVariable("clientId") UUID clientId, @RequestBody MoneyDto transaction)
-            throws IllegalClientIdException {
+    public ResponseEntity<Void> changeBalance(@PathVariable("clientId") UUID clientId, @RequestBody MoneyDto transaction) {
         bankService.changeBalance(clientId, transaction.getAmount());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping("/bank/v1/clients/{clientId}/transactions/")
-    public List<TransactionDto> getListOfTransactions(@PathVariable("clientId") UUID clientId) throws IllegalClientIdException {
+    public List<TransactionDto> getListOfTransactions(@PathVariable("clientId") UUID clientId) {
         return bankService.getTransactions(clientId)
                 .stream().map(TransactionDto::toDto)
                 .collect(Collectors.toList());

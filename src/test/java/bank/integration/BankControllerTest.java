@@ -37,9 +37,9 @@ public class BankControllerTest {
 
     @Test
     public void headClient() throws Exception {
-        MvcResult resultActions = createClient();
+        MvcResult clientPostResult = createClient();
 
-        mvc.perform(head("/bank/v1/clients/" + clientId(resultActions)))
+        mvc.perform(head("/bank/v1/clients/" + clientId(clientPostResult)))
                 .andExpect(status().isOk());
     }
 

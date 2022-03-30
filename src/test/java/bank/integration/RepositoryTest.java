@@ -25,12 +25,12 @@ public class RepositoryTest {
     }
 
     @Test(expected = ClientNotFoundException.class)
-    public void testGetNotExistingClient() throws IllegalClientIdException {
+    public void testGetNotExistingClient() {
         repository.getClientById(UUID.randomUUID());
     }
 
     @Test
-    public void testClientEqualsRepositoryClient() throws IllegalClientIdException {
+    public void testClientEqualsRepositoryClient() {
         Client client = new Client();
         client.changeBalance(200, Currency.RUB, new Date());
         repository.saveClient(client);
@@ -46,7 +46,7 @@ public class RepositoryTest {
     }
 
     @Test
-    public void testClientHasTwoTransactions() throws IllegalClientIdException {
+    public void testClientHasTwoTransactions() {
         Client client = new Client();
         client.changeBalance(200, Currency.RUB, new Date());
         client.changeBalance(50, Currency.RUB, new Date());
@@ -56,7 +56,7 @@ public class RepositoryTest {
     }
 
     @Test
-    public void testEmptyClient() throws IllegalClientIdException {
+    public void testEmptyClient() {
         Client client = new Client();
         repository.saveClient(client);
 

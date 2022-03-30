@@ -8,13 +8,13 @@ import bank.application.adapters.ClientRepository;
 import bank.domain.Currency;
 import bank.domain.MoneyAccount;
 import bank.domain.Transaction;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
 
-@Service
+@Repository
 public class RealClientRepository implements ClientRepository {
     private final String DB_URL = "jdbc:h2:tcp://localhost/~/test";
     private final Connection connection;
@@ -31,7 +31,7 @@ public class RealClientRepository implements ClientRepository {
             ResultSet resultSet = getStatement().executeQuery("select *from CLIENTS where id = '" + clientId + "'");
             return resultSet.next();
         } catch (SQLException ex) {
-            throw new RepositoryError("Bad service connection");
+            throw new RepositoryError("BAD SERVICE CONNECTION");
         }
     }
 
@@ -40,15 +40,13 @@ public class RealClientRepository implements ClientRepository {
     }
 
     @Override
-    public Client getClientById(UUID clientId) throws IllegalClientIdException {
-        if(clientId == null)
-            throw new IllegalClientIdException("Client id shouldn't be null or empty");
+    public Client getClientById(UUID clientId) {
         try {
             ResultSet resultSet = queryClientData(clientId);
             throwIfNoClient(resultSet.next());
-            return new Client(clientId, Map.of(Currency.RUB, createClient(resultSet)));
+            return new Client(clientId, Map.of(Currency.RUB, createMoneyAccount(resultSet)));
         } catch (SQLException ex) {
-            throw new RepositoryError("Bad service connection");
+            throw new RepositoryError("BAD SERVICE CONNECTION");
         }
     }
 
@@ -59,7 +57,7 @@ public class RealClientRepository implements ClientRepository {
                 "WHERE C.ID = '" + clientId + "'");
     }
 
-    private MoneyAccount createClient(ResultSet resultSet) throws SQLException {
+    private MoneyAccount createMoneyAccount(ResultSet resultSet) throws SQLException {
         return new MoneyAccount(getAccountId(resultSet), getTransactionList(resultSet));
     }
 
@@ -98,7 +96,7 @@ public class RealClientRepository implements ClientRepository {
 
     private void throwIfNoClient(boolean hasNext) throws SQLException {
         if (!hasNext) {
-            throw new ClientNotFoundException("Client not found");
+            throw new ClientNotFoundException("CLIENT NOT FOUND");
         }
     }
 
@@ -112,7 +110,7 @@ public class RealClientRepository implements ClientRepository {
             connection.commit();
 
         } catch (SQLException ex) {
-            throw new RepositoryError("Bad service connection");
+            throw new RepositoryError("BAD SERVICE CONNECTION");
         }
     }
 

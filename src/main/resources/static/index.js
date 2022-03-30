@@ -41,7 +41,7 @@ class MainPage extends React.Component {
       event.preventDefault();
       this.setState({ buttonCreate: false });
       if (this.state.value == "") {
-          alert("id shouldn't be empty");
+          alert("INPUT CLIENT ID");
         } else {
             const response = await fetch('http://localhost:8080/bank/v1/clients/' + this.state.value);
             if (response.ok) {

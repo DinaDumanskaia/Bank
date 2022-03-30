@@ -16,9 +16,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.time.zone.ZoneOffsetTransitionRule;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -120,10 +126,30 @@ public class BankControllerTest {
         Assertions.assertEquals(400, transactionsDTO.get(1).getAmount());
     }
 
+    @Test
+    public void getTransactionDate() throws Exception {
+        MvcResult mvcResult = createClient();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zz yyyy", Locale.US);
+
+        long start = System.currentTimeMillis();
+        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+        postTransaction(10, clientId(mvcResult));
+
+        MvcResult getClientResult = mvc.perform(get(transactionsUrl(clientId(mvcResult))))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        List<TransactionDto> transactionsDTO = getTransactionsDTO(getClientResult);
+        Date date = simpleDateFormat.parse(transactionsDTO.get(0).getDate());
+        long finish = System.currentTimeMillis();
+
+        assertTrue(start < date.getTime());
+        assertTrue(finish > date.getTime());
+    }
+
     private List<TransactionDto> getTransactionsDTO(MvcResult getClientResult) throws UnsupportedEncodingException, JsonProcessingException {
         final String json = getClientResult.getResponse().getContentAsString();
-        return objectMapper.readValue(json, new TypeReference<>() {
-        });
+        return objectMapper.readValue(json, new TypeReference<List<TransactionDto>>(){});
     }
 
     private String getMoneyDto(int transaction) throws JsonProcessingException {

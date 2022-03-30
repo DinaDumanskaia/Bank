@@ -1,5 +1,6 @@
 package bank.acceptance;
 
+import bank.unit.FakeDateProviderImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,8 +18,13 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.Thread.sleep;
 import static java.net.http.HttpRequest.BodyPublishers.noBody;
@@ -48,7 +54,7 @@ public class AcceptanceTest {
         for (int i = 0; i <= 10; i++) {
             Process exec = Runtime.getRuntime().exec("cmd /c netstat -aon | find \"8080\" | find \"LISTEN\"");
             List<String> outputLines = outputLines(exec.getInputStream());
-            if (! outputLines.isEmpty()) return getPid(outputLines);
+            if (!outputLines.isEmpty()) return getPid(outputLines);
             System.out.println("App has not started yet");
             sleep(1000);
         }
@@ -78,7 +84,7 @@ public class AcceptanceTest {
     }
 
     private static List<String> outputLines(InputStream inputStream) {
-        BufferedReader reader=new BufferedReader( new InputStreamReader(inputStream));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         return reader.lines().toList();
     }
 
@@ -143,6 +149,24 @@ public class AcceptanceTest {
     }
 
     @Test
+    public void checkTransactionDate() throws IOException, URISyntaxException, InterruptedException, ParseException {
+        int transaction = 10;
+        String id = postClient();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zz yyyy", Locale.US);
+
+        long start = System.currentTimeMillis();
+        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+        postTransaction(transaction, id);
+        HttpResponse<String> response = sendRequest(getRequest("http://localhost:8080/bank/v1/clients/" + id + "/transactions/"));
+        long finish = System.currentTimeMillis();
+
+        Date date = simpleDateFormat.parse(getDateFromTransaction(response.body(), 0));
+
+        Assert.assertTrue(start < date.getTime());
+        Assert.assertTrue(finish > date.getTime());
+    }
+
+    @Test
     public void testStartCreateChangeBalanceKillStartCheckBalance() throws IOException, URISyntaxException, InterruptedException {
         String clientId = postClient();
         postTransaction(10, clientId);
@@ -182,6 +206,11 @@ public class AcceptanceTest {
     private int getAmountFromTransaction(String jsonBody, int transactionIndex) throws JsonProcessingException {
         JsonNode jsonNode = new ObjectMapper().readTree(jsonBody);
         return jsonNode.get(transactionIndex).get("amount").asInt();
+    }
+
+    private String getDateFromTransaction(String jsonBody, int transactionIndex) throws JsonProcessingException {
+        JsonNode jsonNode = new ObjectMapper().readTree(jsonBody);
+        return jsonNode.get(transactionIndex).get("date").asText();
     }
 
     private int getClientBalanceFromJson(String jsonBody) throws JsonProcessingException {

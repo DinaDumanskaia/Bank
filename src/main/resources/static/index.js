@@ -109,6 +109,7 @@ class ClientPage extends React.Component {
         buttonTransaction: false,
         value3 : '',
         transactions: []
+        datestamps: []
     };
 
     this.handleChangeBalance = this.handleChangeBalance.bind(this);
@@ -139,6 +140,7 @@ class ClientPage extends React.Component {
         this.setState({ value1: '' });
         const balanceResponse = await fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId);
         const data = await balanceResponse.json();
+
         this.setState({ clientId: data.id, balance: data.balance });
     }
 
@@ -146,15 +148,25 @@ class ClientPage extends React.Component {
         this.setState({value1: event.target.value});
     }
 
-
+//    async handleSubmitGetTransaction(event) {
+//        event.preventDefault();
+//        this.setState({buttonTransaction: true});
+//        const response = await fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId + '/transactions/');
+//        const data = await response.json();
+//        const transactions = data.map(transaction => transaction.amount));
+//        this.setState({amount: data.amount, date: data.date});
+//    }
 
     handleSubmitGetTransaction(event) {
         event.preventDefault();
         this.setState({buttonTransaction: true});
         fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId + '/transactions/')
             .then(res => res.json())
+//            .then(resTransactions => this.setState({transactions : resTransactions}));
+//            .then(resTransactions => console.log(resTransactions));
             .then(res => res.map(transaction => transaction.amount))
-            .then(transactionAmounts => this.setState({transactions : transactionAmounts}));
+            .then(transactionAmounts => this.setState({transactions : transactionAmounts}))
+//            .then(transactionDates => this.setState({datestamps : transactionDates}));
     }
 
     handleChangeId(event) {

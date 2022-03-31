@@ -106,7 +106,6 @@ public class AcceptanceTest {
         Assert.assertEquals(0, getClientBalanceFromJson(response.body()));
     }
 
-
     @Test
     public void afterPostingTransaction_BalanceShouldChangeByTransactionAmount() throws URISyntaxException, IOException, InterruptedException {
         int transaction = 100;
@@ -152,18 +151,27 @@ public class AcceptanceTest {
     public void checkTransactionDate() throws IOException, URISyntaxException, InterruptedException, ParseException {
         int transaction = 10;
         String id = postClient();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zz yyyy", Locale.US);
 
         long start = System.currentTimeMillis();
-        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
-        postTransaction(transaction, id);
-        HttpResponse<String> response = sendRequest(getRequest("http://localhost:8080/bank/v1/clients/" + id + "/transactions/"));
+        HttpResponse<String> response = getTransactionsResponse(transaction, id);
         long finish = System.currentTimeMillis();
 
-        Date date = simpleDateFormat.parse(getDateFromTransaction(response.body(), 0));
+        Date date = getDateFormat(response);
 
         Assert.assertTrue(start < date.getTime());
         Assert.assertTrue(finish > date.getTime());
+    }
+
+    private Date getDateFormat(HttpResponse<String> response) throws ParseException, JsonProcessingException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zz yyyy", Locale.US);
+        Date date = simpleDateFormat.parse(getDateFromTransaction(response.body(), 0));
+        return date;
+    }
+
+    private HttpResponse<String> getTransactionsResponse(int transaction, String id) throws InterruptedException, IOException, URISyntaxException {
+        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+        postTransaction(transaction, id);
+        return sendRequest(getRequest("http://localhost:8080/bank/v1/clients/" + id + "/transactions/"));
     }
 
     @Test

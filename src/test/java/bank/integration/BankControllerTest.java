@@ -86,10 +86,6 @@ public class BankControllerTest {
         ).andExpect(status().isCreated());
     }
 
-    private TransactionDto getTransactionDTO(MvcResult mvcResult) throws JsonProcessingException, UnsupportedEncodingException {
-        return objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TransactionDto.class);
-    }
-
     private String transactionsUrl(String clientId) {
         return "/bank/v1/clients/" + clientId + "/transactions/";
     }
@@ -129,9 +125,16 @@ public class BankControllerTest {
     @Test
     public void getTransactionDate() throws Exception {
         MvcResult mvcResult = createClient();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zz yyyy", Locale.US);
 
         long start = System.currentTimeMillis();
+        Date date = getTransactionDate(mvcResult);
+        long finish = System.currentTimeMillis();
+
+        assertTrue(start < date.getTime());
+        assertTrue(finish > date.getTime());
+    }
+
+    private Date getTransactionDate(MvcResult mvcResult) throws Exception {
         Thread.sleep(TimeUnit.SECONDS.toMillis(1));
         postTransaction(10, clientId(mvcResult));
 
@@ -140,11 +143,8 @@ public class BankControllerTest {
                 .andReturn();
 
         List<TransactionDto> transactionsDTO = getTransactionsDTO(getClientResult);
-        Date date = simpleDateFormat.parse(transactionsDTO.get(0).getDate());
-        long finish = System.currentTimeMillis();
-
-        assertTrue(start < date.getTime());
-        assertTrue(finish > date.getTime());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zz yyyy", Locale.US);
+        return simpleDateFormat.parse(transactionsDTO.get(0).getDate());
     }
 
     private List<TransactionDto> getTransactionsDTO(MvcResult getClientResult) throws UnsupportedEncodingException, JsonProcessingException {

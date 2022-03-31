@@ -104,6 +104,7 @@ class ClientPage extends React.Component {
     super(props);
     this.state = {
         value1: '',
+        value2: '',
         clientId : props.clientId,
         balance : props.balance,
         buttonTransaction: false,
@@ -114,7 +115,9 @@ class ClientPage extends React.Component {
     };
 
     this.handleChangeBalance = this.handleChangeBalance.bind(this);
+    this.handleChangeBalance2 = this.handleChangeBalance2.bind(this);
     this.handleSubmitBalanceModify = this.handleSubmitBalanceModify.bind(this);
+    this.handleSubmitBalanceModify2 = this.handleSubmitBalanceModify2.bind(this);
 
     this.handleSubmitGetTransaction = this.handleSubmitGetTransaction.bind(this);
     this.printTransactions = this.printTransactions.bind(this);
@@ -145,8 +148,36 @@ class ClientPage extends React.Component {
         this.setState({ clientId: data.id, balance: data.balance });
     }
 
-    handleChangeBalance(event) {
+    async handleSubmitBalanceModify2(event) {
+        event.preventDefault();
+        if (!this.state.value2) {
+            return;
+        }
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount: this.state.value2 * (-1) })
+        };
+
+        const response = await fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId + '/transactions/', requestOptions);
+        if (!response.ok) {
+            await showError(response);
+            return;
+        }
+
+        this.setState({ value2: '' });
+        const balanceResponse = await fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId);
+        const data = await balanceResponse.json();
+
+        this.setState({ clientId: data.id, balance: data.balance });
+    }
+
+    async handleChangeBalance(event) {
         this.setState({value1: event.target.value});
+    }
+
+    async handleChangeBalance2(event) {
+        this.setState({value2: event.target.value});
     }
 
     async handleSubmitGetTransaction(event) {
@@ -156,7 +187,7 @@ class ClientPage extends React.Component {
         const data = await response.json();
         const amounts = data.map(transactionAmount => transactionAmount.amount);
         const dates = data.map(transactionDate => transactionDate.date);
-        const combined = data.map(element => element.amount + ' at ' + element.date);
+        const combined = data.map(element => element.amount + ' RUB at ' + element.date);
 
         this.setState({transactionAmounts: amounts});
         this.setState({transactionDates: dates});
@@ -179,12 +210,17 @@ ClientInfo() {
             <div className="column">
                 <form onSubmit={this.handleSubmitBalanceModify}>
                     <h3>
-                        Изменить баланс:
-                        <input type="number" min="-2000000000" max="2000000000" value={this.state.value1} onChange={this.handleChangeBalance} />
+                        <input type="number" min="1" max="2000000000" value={this.state.value1} onChange={this.handleChangeBalance} />
+                    <input type="submit" value="Пополнить" />
                     </h3>
-                    <input type="submit" value="Перевести" />
                 </form>
-                    <form onSubmit={this.handleSubmitGetTransaction}>
+                <form onSubmit={this.handleSubmitBalanceModify2}>
+                    <h3>
+                        <input type="number" min="1" max="2000000000" value={this.state.value2} onChange={this.handleChangeBalance2} />
+                    <input type="submit" value="Списать" />
+                    </h3>
+                </form>
+                <form onSubmit={this.handleSubmitGetTransaction}>
                     <h3>
                         Запросить выписку:
                     </h3>

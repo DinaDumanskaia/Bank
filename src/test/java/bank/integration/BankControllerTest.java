@@ -1,5 +1,6 @@
 package bank.integration;
 
+import bank.application.BankService;
 import bank.infrastructure.web.dto.ClientDto;
 import bank.infrastructure.web.dto.MoneyDto;
 import bank.infrastructure.web.dto.TransactionDto;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -34,6 +36,7 @@ public class BankControllerTest {
     @Autowired
     MockMvc mvc;
     ObjectMapper objectMapper = new ObjectMapper();
+
 
     @Test
     public void postClient() throws Exception {

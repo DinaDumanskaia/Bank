@@ -108,8 +108,9 @@ class ClientPage extends React.Component {
         balance : props.balance,
         buttonTransaction: false,
         value3 : '',
-        transactions: []
-        datestamps: []
+        transactionInfo: [],
+        transactionAmounts: [],
+        transactionDates: []
     };
 
     this.handleChangeBalance = this.handleChangeBalance.bind(this);
@@ -148,31 +149,23 @@ class ClientPage extends React.Component {
         this.setState({value1: event.target.value});
     }
 
-//    async handleSubmitGetTransaction(event) {
-//        event.preventDefault();
-//        this.setState({buttonTransaction: true});
-//        const response = await fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId + '/transactions/');
-//        const data = await response.json();
-//        const transactions = data.map(transaction => transaction.amount));
-//        this.setState({amount: data.amount, date: data.date});
-//    }
-
-    handleSubmitGetTransaction(event) {
+    async handleSubmitGetTransaction(event) {
         event.preventDefault();
         this.setState({buttonTransaction: true});
-        fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId + '/transactions/')
-            .then(res => res.json())
-//            .then(resTransactions => this.setState({transactions : resTransactions}));
-//            .then(resTransactions => console.log(resTransactions));
-            .then(res => res.map(transaction => transaction.amount))
-            .then(transactionAmounts => this.setState({transactions : transactionAmounts}))
-//            .then(transactionDates => this.setState({datestamps : transactionDates}));
+        const response = await fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId + '/transactions/');
+        const data = await response.json();
+        const amounts = data.map(transactionAmount => transactionAmount.amount);
+        const dates = data.map(transactionDate => transactionDate.date);
+        const combined = data.map(element => element.amount + ' at ' + element.date);
+
+        this.setState({transactionAmounts: amounts});
+        this.setState({transactionDates: dates});
+        this.setState({transactionInfo: combined});
     }
 
     handleChangeId(event) {
         this.setState({value3: event.target.value});
     }
-
 
 
 ClientInfo() {
@@ -205,11 +198,15 @@ ClientInfo() {
 
     printTransactions() {
         return (
-            <ul>
-                {this.state.transactions.map(item => {
-                    return <li>{item}</li>;
-                })}
-            </ul>
+                <div>
+                    <ul>
+                        {this.state.transactionInfo.map(item => {
+                            return <li>{item}</li>;
+                        })}
+                    </ul>
+                </div>
+
+
         );
     }
 
@@ -221,8 +218,8 @@ ClientInfo() {
                         {this.ClientInfo()}
                     </div>
                     <div className="transactions">
-                    {this.state.transactions.length ? 'Транзакции:' : 'Транзакций нет'}
-                        {this.printTransactions()}
+                    {this.state.transactionAmounts.length ? 'Транзакции:' : 'Транзакций нет'}
+                    {this.printTransactions()}
                     </div>
                 </div>
             );

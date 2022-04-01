@@ -119,6 +119,18 @@ public class AcceptanceTest {
     }
 
     @Test
+    public void nullAmount() throws URISyntaxException, IOException, InterruptedException {
+        Integer transaction = null;
+        String clientId = postClient();
+
+        int statusCode = postTransaction(transaction, clientId);
+        Assert.assertEquals(HttpStatus.CREATED.value(), statusCode);
+
+        Integer currentBalance = getCurrentBalanceRequest(clientId);
+        Assert.assertNotNull(currentBalance);
+    }
+
+    @Test
     public void testIfTransactionMakesBalanceNegative_TransactionFailBalanceNotChanging() throws IOException, URISyntaxException, InterruptedException {
         int firstTransaction = 10;
         int secondTransaction = -100;
@@ -149,13 +161,16 @@ public class AcceptanceTest {
 
     @Test
     public void checkTransactionDate() throws IOException, URISyntaxException, InterruptedException, ParseException {
+        // Given
         int transaction = 10;
         String id = postClient();
 
+        // When
         long start = System.currentTimeMillis();
         HttpResponse<String> response = getTransactionsResponse(transaction, id);
         long finish = System.currentTimeMillis();
 
+        // Then
         Date date = getDateFormat(response);
 
         Assert.assertTrue(start < date.getTime());
@@ -164,8 +179,7 @@ public class AcceptanceTest {
 
     private Date getDateFormat(HttpResponse<String> response) throws ParseException, JsonProcessingException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zz yyyy", Locale.US);
-        Date date = simpleDateFormat.parse(getDateFromTransaction(response.body(), 0));
-        return date;
+        return simpleDateFormat.parse(getDateFromTransaction(response.body(), 0));
     }
 
     private HttpResponse<String> getTransactionsResponse(int transaction, String id) throws InterruptedException, IOException, URISyntaxException {
@@ -191,7 +205,7 @@ public class AcceptanceTest {
         return getClientBalanceFromJson(clientResponse.body());
     }
 
-    private int postTransaction(int transaction, String id) throws IOException, InterruptedException, URISyntaxException {
+    private int postTransaction(Integer transaction, String id) throws IOException, InterruptedException, URISyntaxException {
         HttpResponse<String> postBalanceResponse =
                 sendRequest(createChangeBalanceRequest(composeTransactionUrl(id), transaction));
         return postBalanceResponse.statusCode();
@@ -257,7 +271,7 @@ public class AcceptanceTest {
                 .build();
     }
 
-    private HttpRequest createChangeBalanceRequest(String urlInputString, int transaction) throws URISyntaxException {
+    private HttpRequest createChangeBalanceRequest(String urlInputString, Integer transaction) throws URISyntaxException {
         String requestBody = createJSONChangeBalanceRequestBody(transaction);
         return HttpRequest.newBuilder()
                 .uri(new URI(urlInputString))
@@ -266,7 +280,7 @@ public class AcceptanceTest {
                 .build();
     }
 
-    private String createJSONChangeBalanceRequestBody(int transaction) {
+    private String createJSONChangeBalanceRequestBody(Integer transaction) {
         return "{\"amount\":\"" + transaction + "\"}";
     }
 

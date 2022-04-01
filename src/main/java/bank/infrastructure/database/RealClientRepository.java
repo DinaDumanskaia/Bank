@@ -1,6 +1,5 @@
 package bank.infrastructure.database;
 
-import bank.application.exceptions.IllegalClientIdException;
 import bank.application.exceptions.RepositoryError;
 import bank.domain.Client;
 import bank.application.exceptions.ClientNotFoundException;

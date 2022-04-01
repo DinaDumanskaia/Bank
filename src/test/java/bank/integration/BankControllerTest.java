@@ -13,6 +13,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -28,6 +29,8 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -62,19 +65,30 @@ public class BankControllerTest {
         return new Client(clientID, map);
     }
 
-    //@Test
+    @Test
     public void checkBalanceOfCreatedClientIsZero() throws Exception {
-        MvcResult mvcResult = createClient();
-        MvcResult getClientResult = mvc.perform(get("/bank/v1/clients/" + clientId(mvcResult)))
+        Client client = createMockClient();
+
+        Mockito.when(bankService.getClientById(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0).equals(client.getID()) ? client : null);
+
+        String expected = objectMapper.writeValueAsString(ClientDto.toDto(client));
+
+        MvcResult getClientResult = mvc.perform(get("/bank/v1/clients/" + client.getID().toString()))
                 .andExpect(status().isOk())
+                .andExpect(content().json(expected))
                 .andReturn();
 
-        Assertions.assertEquals(0, getClientDTO(getClientResult).getBalance());
+        ClientDto clientDto = getClientDTO(getClientResult);
+        Assertions.assertNotNull(clientDto);
+        Assertions.assertEquals(0, clientDto.getBalance());
     }
 
-    private MvcResult createClient() throws Exception {
+    private MvcResult returnMVCMockClient(Client client) throws Exception {
+        String expected = objectMapper.writeValueAsString(ClientDto.toDto(client));
         return mvc.perform(post("/bank/v1/clients/"))
                 .andExpect(status().isCreated())
+                .andExpect(content().json(expected))
                 .andReturn();
     }
 
@@ -86,7 +100,8 @@ public class BankControllerTest {
 
     //@Test
     public void testDepositMoneyForCreatedClient() throws Exception {
-        MvcResult result = createClient();
+        Client client = createMockClient();
+        MvcResult result = returnMVCMockClient(client);
 
         postTransaction(100, clientId(result));
     }
@@ -105,7 +120,8 @@ public class BankControllerTest {
 
     //@Test
     public void getBalanceOfCreatedClient() throws Exception {
-        MvcResult result = createClient();
+        Client client = createMockClient();
+        MvcResult result = returnMVCMockClient(client);
         mvc.perform(get("/bank/v1/clients/" + clientId(result) + "/balance/")
                 .contentType(MediaType.APPLICATION_JSON)
         ).andReturn();
@@ -113,7 +129,8 @@ public class BankControllerTest {
 
     //@Test
     public void testDepositNegative() throws Exception {
-        MvcResult result = createClient();
+        Client client = createMockClient();
+        MvcResult result = returnMVCMockClient(client);
 
         mvc.perform(post(transactionsUrl(clientId(result)))
             .content(getMoneyDto(-100))
@@ -123,10 +140,11 @@ public class BankControllerTest {
 
     //@Test
     public void getTransactions() throws Exception {
-        MvcResult mvcResult = createClient();
-        postTransaction(10, clientId(mvcResult));
-        postTransaction(400, clientId(mvcResult));
-        MvcResult getClientResult = mvc.perform(get(transactionsUrl(clientId(mvcResult))))
+        Client client = createMockClient();
+        MvcResult result = returnMVCMockClient(client);
+        postTransaction(10, clientId(result));
+        postTransaction(400, clientId(result));
+        MvcResult getClientResult = mvc.perform(get(transactionsUrl(clientId(result))))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -137,10 +155,11 @@ public class BankControllerTest {
 
     //@Test
     public void getTransactionDate() throws Exception {
-        MvcResult mvcResult = createClient();
+        Client client = createMockClient();
+        MvcResult result = returnMVCMockClient(client);
 
         long start = System.currentTimeMillis();
-        Date date = getTransactionDate(mvcResult);
+        Date date = getTransactionDate(result);
         long finish = System.currentTimeMillis();
 
         assertTrue(start < date.getTime());

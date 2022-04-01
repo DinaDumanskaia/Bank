@@ -4,7 +4,6 @@ import bank.application.BankService;
 import bank.domain.Client;
 import bank.domain.Currency;
 import bank.domain.MoneyAccount;
-import bank.domain.Transaction;
 import bank.infrastructure.web.dto.ClientDto;
 import bank.infrastructure.web.dto.MoneyDto;
 import bank.infrastructure.web.dto.TransactionDto;
@@ -13,7 +12,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -92,9 +89,14 @@ public class BankControllerTest {
                 .andReturn();
     }
 
-    //@Test
-    public void headClientThatIsNotExist() throws Exception {
-        mvc.perform(head("/bank/v1/clients/" + UUID.randomUUID()))
+    @Test
+    public void getClientThatIsNotExist() throws Exception {
+        Client client = createMockClient();
+
+        Mockito.when(bankService.getClientById(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0).equals(client.getID()) ? client : null);
+
+        mvc.perform(get("/bank/v1/clients/" + UUID.randomUUID()))
                 .andExpect(status().isNotFound());
     }
 

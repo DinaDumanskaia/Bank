@@ -1,6 +1,7 @@
 package bank.infrastructure.web;
 
 import bank.application.BankService;
+import bank.application.exceptions.ClientNotFoundException;
 import bank.application.exceptions.IllegalClientIdException;
 import bank.domain.Client;
 import bank.application.exceptions.RepositoryError;
@@ -31,6 +32,9 @@ public class BankController {
     @GetMapping("/bank/v1/clients/{clientId}")
     public ClientDto getClient(@PathVariable("clientId") String uuidStr) {
         Client client = bankService.getClientById(getUuid(uuidStr));
+        if (client == null) {
+            throw new ClientNotFoundException("CLIENT NOT FOUND");
+        }
         return ClientDto.toDto(client);
     }
 

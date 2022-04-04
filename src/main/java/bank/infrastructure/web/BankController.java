@@ -51,12 +51,19 @@ public class BankController {
 
     @PostMapping("/bank/v1/clients/{clientId}/transactions/")
     public ResponseEntity<Void> changeBalance(@PathVariable("clientId") UUID clientId, @RequestBody MoneyDto transaction) {
+        if (clientId == null) {
+            throw new IllegalClientIdException("INCORRECT ID");
+        }
         bankService.changeBalance(clientId, transaction.getAmount());
+
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping("/bank/v1/clients/{clientId}/transactions/")
     public List<TransactionDto> getListOfTransactions(@PathVariable("clientId") UUID clientId) {
+        if (clientId == null) {
+            throw new IllegalClientIdException("INCORRECT ID");
+        }
         return bankService.getTransactions(clientId)
                 .stream().map(TransactionDto::toDto)
                 .collect(Collectors.toList());

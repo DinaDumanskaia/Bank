@@ -26,6 +26,7 @@ public class RealClientRepository implements ClientRepository {
 
     @Override
     public boolean clientExists(UUID clientId) {
+        //clientId could not be compromised because its string representation could be only numeric value
         try {
             ResultSet resultSet = getStatement().executeQuery("select *from CLIENTS where id = '" + clientId + "'");
             return resultSet.next();
@@ -33,6 +34,19 @@ public class RealClientRepository implements ClientRepository {
             throw new RepositoryError("BAD SERVICE CONNECTION");
         }
     }
+
+//    @Override
+//    public boolean clientExists(UUID clientId) {
+//        //clientId could not be compromised because its string representation could be only numeric value
+//        try {
+//            PreparedStatement statement = connection.prepareStatement("SELECT * FROM CLIENTS WHERE id = ?");
+//            statement.setString(1, clientId.toString());
+//            statement.execute();
+//            return statement.executeQuery().getStatement().toString();
+//        } catch (SQLException ex) {
+//            throw new RepositoryError("BAD SERVICE CONNECTION");
+//        }
+//    }
 
     private Statement getStatement() throws SQLException {
         return DriverManager.getConnection(DB_URL, "sa", "password").createStatement();

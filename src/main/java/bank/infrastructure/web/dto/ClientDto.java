@@ -1,5 +1,6 @@
 package bank.infrastructure.web.dto;
 
+import bank.application.exceptions.ClientNotFoundException;
 import bank.domain.Client;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,7 +9,7 @@ import java.util.UUID;
 
 public class ClientDto {
     private UUID id;
-    private int balance;
+    private Integer balance;
 
     @JsonCreator
     public ClientDto(
@@ -19,6 +20,9 @@ public class ClientDto {
     }
 
     public static ClientDto toDto(Client client) {
+        if (client == null) {
+            throw new ClientNotFoundException("CLIENT NOT FOUND");
+        }
         return new ClientDto(client.getID(), client.getBalance());
     }
 
@@ -26,7 +30,7 @@ public class ClientDto {
         return id;
     }
 
-    public int getBalance() {
+    public Integer getBalance() {
         return balance;
     }
 
@@ -35,7 +39,7 @@ public class ClientDto {
         this.id = id;
     }
 
-    public void setBalance(int balance) {
+    public void setBalance(Integer balance) {
         this.balance = balance;
     }
 

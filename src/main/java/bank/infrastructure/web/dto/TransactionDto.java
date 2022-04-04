@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.Locale;
 
 public class TransactionDto {
-    int amount;
+    Integer amount;
     @JsonFormat(locale = "en_US", pattern="EEE MMM dd HH:mm:ss zz yyyy")
     Date date;
 
@@ -24,11 +24,11 @@ public class TransactionDto {
         this.date = date;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(Integer amount) {
         this.amount = amount;
     }
 
-    public int getAmount() {
+    public Integer getAmount() {
         return amount;
     }
 
@@ -37,8 +37,6 @@ public class TransactionDto {
     }
 
     public static void main(String[] args) throws ParseException {
-        //Thu Mar 31 00:43:19 MSK 2022
-        //чт 03 31 00:44:15 MSK 2022
         String format = "EEE MMM dd HH:mm:ss zz yyyy";
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format, Locale.US);

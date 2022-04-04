@@ -35,6 +35,10 @@ public class MoneyAccount {
         }
     }
 
+    public void addTransaction(Transaction transaction) {
+        transactions.add(transaction);
+    }
+
     private boolean isTransactionAvailable(int value) {
         return (getBalance() + value) >= 0;
     }
@@ -68,6 +72,10 @@ public class MoneyAccount {
     }
 
     public UUID getAccountId() {
+        return accountId;
+    }
+
+    public UUID getMoneyAccountId() {
         return accountId;
     }
 }

@@ -1,40 +1,30 @@
 package bank.infrastructure.database;
 
+import bank.application.adapters.ClientRepository;
+import bank.application.exceptions.ClientNotFoundException;
 import bank.application.exceptions.IllegalClientIdException;
 import bank.application.exceptions.RepositoryError;
 import bank.domain.Client;
-import bank.application.exceptions.ClientNotFoundException;
-import bank.application.adapters.ClientRepository;
 import bank.domain.Currency;
 import bank.domain.MoneyAccount;
 import bank.domain.Transaction;
 import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 import java.sql.*;
-import java.util.*;
 import java.util.Date;
+import java.util.*;
 
 @Repository
-public class RealClientRepository implements ClientRepository {
+public class MultiCurrencyRealClientRepository implements ClientRepository {
     private final String DB_URL = "jdbc:h2:tcp://localhost/~/test";
     private final Connection connection;
     private final Statement statement;
     PreparedStatement preparedStatement;
 
-    public RealClientRepository() throws SQLException {
+    public MultiCurrencyRealClientRepository() throws SQLException {
         this.connection = DriverManager.getConnection(DB_URL, "sa", "password");
         statement = connection.createStatement();
-    }
-
-    //@Override
-    public boolean clientExists1(UUID clientId) {
-        //clientId could not be compromised because its string representation could be only numeric value
-        try {
-            ResultSet resultSet = getStatement().executeQuery("select *from CLIENTS where id = '" + clientId + "'");
-            return resultSet.next();
-        } catch (SQLException ex) {
-            throw new RepositoryError("BAD SERVICE CONNECTION");
-        }
     }
 
     @Override
@@ -65,16 +55,19 @@ public class RealClientRepository implements ClientRepository {
             preparedStatement.setString(1, clientId.toString());
             ResultSet resultSet = preparedStatement.executeQuery();
             throwIfNoClient(resultSet.next());
-            List<Transaction> transactions = new ArrayList<>();
+
+
+            EnumMap<Currency, MoneyAccount> moneyAccountMap = new EnumMap<>(Currency.class);
             do {
                 if (hasTransaction(resultSet)) {
-                    Transaction e = new Transaction(getTransactionId(resultSet), getAmount(resultSet), getTransactionDate(resultSet));
-                    transactions.add(e);
+                    Currency currency = Currency.valueOf(getCurrency(resultSet));
+                    MoneyAccount moneyAccountForCurrency = moneyAccountMap.getOrDefault(currency, new MoneyAccount());
+                    moneyAccountForCurrency.addTransaction(new Transaction(getTransactionId(resultSet), getAmount(resultSet), getTransactionDate(resultSet)));
+                    moneyAccountMap.put(currency, moneyAccountForCurrency);
                 }
             } while (resultSet.next());
-            MoneyAccount v1 = new MoneyAccount(UUID.fromString(resultSet.getString("ACCOUNT_ID")), transactions);
-            Client client = new Client(clientId, Map.of(Currency.RUB, v1));
-            return client;
+
+            return new Client(clientId, moneyAccountMap);
         } catch (SQLException ex) {
             throw new RepositoryError("BAD SERVICE CONNECTION");
         }
@@ -118,6 +111,10 @@ public class RealClientRepository implements ClientRepository {
         return resultSet.getInt("AMOUNT");
     }
 
+    private String getCurrency(ResultSet resultSet) throws SQLException {
+        return resultSet.getString("CURRENCY");
+    }
+
     private Date getTransactionDate(ResultSet resultSet) throws SQLException {
         return new Date(resultSet.getTimestamp("TRANSACTION_DATE").getTime());
     }
@@ -137,8 +134,10 @@ public class RealClientRepository implements ClientRepository {
         try {
             connection.setAutoCommit(false);
             persistClient(client);
-            persistAccount(client);
-            persistTransactions(client);
+            for (Currency currency : getUsedCurrencyByClient(client)) {
+                persistAccount(client, currency);
+            }
+            persistTransactions(client.getMoneyAccounts());
             connection.commit();
 
         } catch (SQLException ex) {
@@ -146,12 +145,24 @@ public class RealClientRepository implements ClientRepository {
         }
     }
 
-    private void persistAccount(Client client) throws SQLException {
-        preparedStatement = connection.prepareStatement("MERGE INTO ACCOUNTS VALUES( ?, ?, 'RUB')");
-        preparedStatement.setString(1, client.getMoneyAccountId(Currency.RUB).toString());
-        preparedStatement.setString(2, client.getID().toString());
-        preparedStatement.execute();
+    private Set<Currency> getUsedCurrencyByClient(Client client) {
+        // извлечь все транзакции из маниаккаунта и посмотреть какие валюты используются. их и добавить в сет
+        // улыбаца
+        Set<Currency> set = new HashSet<>();
+        Map<Currency, MoneyAccount> map = client.getMoneyAccounts();
+        for (Map.Entry<Currency, MoneyAccount> moneyAccountEntry : map.entrySet()) {
+            set.add(moneyAccountEntry.getKey());
+        }
+        return set;
+    }
 
+
+    private void persistAccount(Client client, Currency currency) throws SQLException {
+        preparedStatement = connection.prepareStatement("MERGE INTO ACCOUNTS VALUES( ?, ?, ?)");
+        preparedStatement.setString(1, client.getMoneyAccountId(currency).toString());
+        preparedStatement.setString(2, client.getID().toString());
+        preparedStatement.setString(3, currency.name());
+        preparedStatement.execute();
     }
 
     private void persistClient(Client client) throws SQLException {
@@ -160,17 +171,21 @@ public class RealClientRepository implements ClientRepository {
         preparedStatement.execute();
      }
 
-    private void persistTransactions(Client client) throws SQLException {
-        for (Transaction transaction : client.getListOfTransactions()) {
-            Date date = transaction.getDate();
-            PreparedStatement preparedStatement = this.connection.prepareStatement(
-                    "MERGE INTO TRANSACTIONS VALUES(?, ?, ?, ?)");
-            preparedStatement.setString(1, transaction.getTransactionId().toString());
-            preparedStatement.setString(2, client.getMoneyAccountId(Currency.RUB).toString());
-            preparedStatement.setInt(3, transaction.getAmount());
-            preparedStatement.setTimestamp(4, new Timestamp(date.getTime()));
-            preparedStatement.execute();
+    private void persistTransactions( Map<Currency, MoneyAccount> moneyAccounts) throws SQLException {
+        for (Map.Entry<Currency, MoneyAccount> moneyAccountEntry : moneyAccounts.entrySet()) {
+            Currency currency = moneyAccountEntry.getKey();
+            MoneyAccount moneyAccount = moneyAccountEntry.getValue();
+
+            for (Transaction transaction : moneyAccount.getMoneyAccountTransactionList()) {
+                Date date = transaction.getDate();
+                PreparedStatement preparedStatement = this.connection.prepareStatement(
+                        "MERGE INTO TRANSACTIONS VALUES(?, ?, ?, ?)");
+                preparedStatement.setString(1, transaction.getTransactionId().toString());
+                preparedStatement.setString(2, moneyAccount.getAccountId().toString());
+                preparedStatement.setInt(3, transaction.getAmount());
+                preparedStatement.setTimestamp(4, new Timestamp(date.getTime()));
+                preparedStatement.execute();
+            }
         }
     }
-
 }

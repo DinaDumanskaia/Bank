@@ -5,6 +5,7 @@ import bank.domain.Client;
 import bank.application.exceptions.ClientNotFoundException;
 import bank.application.adapters.ClientRepository;
 import bank.domain.Currency;
+import bank.infrastructure.database.MultiCurrencyRealClientRepository;
 import bank.infrastructure.database.RealClientRepository;
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,7 +16,7 @@ import java.util.UUID;
 
 
 public class RepositoryTest {
-    ClientRepository repository = new RealClientRepository();
+    ClientRepository repository = new MultiCurrencyRealClientRepository();
 
     public RepositoryTest() throws SQLException {
     }
@@ -60,9 +61,11 @@ public class RepositoryTest {
     public void testClientEURTransaction() {
         Client client = new Client();
         repository.saveClient(client);
+
         Client returnedClient = repository.getClientById(client.getID());
-        client.changeBalance(200, Currency.EUR, new Date());
+        returnedClient.changeBalance(200, Currency.EUR, new Date());
         repository.saveClient(returnedClient);
+
         Client newReturnedClient = repository.getClientById(client.getID());
         Assert.assertEquals(200, newReturnedClient.getMoneyAccountBalance(Currency.EUR));
     }

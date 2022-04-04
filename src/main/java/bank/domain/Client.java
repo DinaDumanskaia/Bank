@@ -13,7 +13,7 @@ public class Client {
 
     public Client(UUID id, Map<Currency, MoneyAccount> moneyAccounts) {
         this.id = id;
-        this.moneyAccounts = moneyAccounts;
+        this.moneyAccounts = new HashMap<>(moneyAccounts);
     }
 
     private MoneyAccount getMoneyAccount(Currency currency) {

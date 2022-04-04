@@ -7,9 +7,8 @@ import bank.domain.MoneyAccount;
 import bank.domain.NegativeBalanceException;
 import bank.infrastructure.web.dto.ClientDto;
 import bank.infrastructure.web.dto.MoneyDto;
-import bank.infrastructure.web.dto.TransactionDto;
+import bank.infrastructure.web.dto.MoneyDtoV2;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -130,6 +129,25 @@ public class BankControllerTest {
 
     private String transactionsUrl(String clientId) {
         return "/bank/v1/clients/" + clientId + "/transactions/";
+    }
+
+    @Test
+    public void testDepositMoneyForCreatedClientV2() throws Exception {
+        Client client = new Client();
+
+        ResultMatcher matcher = (result) ->
+                AssertionErrors.assertEquals("Status", HttpStatus.CREATED.value(),
+                        result.getResponse().getStatus());
+        String urlTemplate = "/bank/v2/clients/" + client.getID().toString() + "/transactions/";
+        //String moneyDto = objectMapper.writeValueAsString(moneyDTO);
+        String moneyDto = "{\"amount\":\"" + TRANSFERRED_MONEY_VALUE + "\", \"currency\":\"EUR\"}";
+
+        mvc.perform(
+                post(urlTemplate)
+                        .content(moneyDto)
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(matcher);
+        Mockito.verify(bankService).changeBalance(client.getID(), Currency.EUR, TRANSFERRED_MONEY_VALUE);
     }
 
     @Test

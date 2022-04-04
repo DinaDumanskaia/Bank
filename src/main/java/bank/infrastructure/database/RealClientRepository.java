@@ -9,7 +9,6 @@ import bank.domain.Currency;
 import bank.domain.MoneyAccount;
 import bank.domain.Transaction;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.sql.*;
 import java.util.*;
@@ -59,9 +58,23 @@ public class RealClientRepository implements ClientRepository {
     @Override
     public Client getClientById(UUID clientId) {
         try {
-            ResultSet resultSet = queryClientData(clientId);
+            preparedStatement = connection.prepareStatement("SELECT * FROM CLIENTS C\n" +
+                    "LEFT JOIN ACCOUNTS A ON A.CLIENT_ID = C.ID\n" +
+                    "LEFT JOIN TRANSACTIONS TR ON TR.ACCOUNT_ID = A.ACCOUNT_ID \n" +
+                    "WHERE C.ID = ? ");
+            preparedStatement.setString(1, clientId.toString());
+            ResultSet resultSet = preparedStatement.executeQuery();
             throwIfNoClient(resultSet.next());
-            return new Client(clientId, Map.of(Currency.RUB, createMoneyAccount(resultSet)));
+            List<Transaction> transactions = new ArrayList<>();
+            do {
+                if (hasTransaction(resultSet)) {
+                    Transaction e = new Transaction(getTransactionId(resultSet), getAmount(resultSet), getTransactionDate(resultSet));
+                    transactions.add(e);
+                }
+            } while (resultSet.next());
+            MoneyAccount v1 = new MoneyAccount(UUID.fromString(resultSet.getString("ACCOUNT_ID")), transactions);
+            Client client = new Client(clientId, Map.of(Currency.RUB, v1));
+            return client;
         } catch (SQLException ex) {
             throw new RepositoryError("BAD SERVICE CONNECTION");
         }
@@ -144,7 +157,7 @@ public class RealClientRepository implements ClientRepository {
         preparedStatement = connection.prepareStatement("MERGE INTO CLIENTS VALUES (?)");
         preparedStatement.setString(1, client.getID().toString());
         preparedStatement.execute();
-    }
+     }
 
     private void persistTransactions(Client client) throws SQLException {
         for (Transaction transaction : client.getListOfTransactions()) {

@@ -1,6 +1,5 @@
 package bank.acceptance;
 
-import bank.unit.FakeDateProviderImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -117,6 +116,29 @@ public class AcceptanceTest {
         int currentBalance = getCurrentBalanceRequest(clientId);
         Assert.assertEquals(transaction, currentBalance);
     }
+
+    @Test
+    public void afterPostingTransactionEUR_BalanceShouldChangeByTransactionAmount() throws URISyntaxException, IOException, InterruptedException {
+        int transaction = 100;
+        String clientId = postClient();
+
+        String urlInputString = "http://localhost:8080/bank/v2/clients/" + clientId + "/transactions/";
+        String requestBody = "{\"amount\":\"" + transaction + "\", \"currency\":\"EUR\"}";
+        HttpRequest changeBalanceRequest = HttpRequest.newBuilder()
+                .uri(new URI(urlInputString))
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .header("Content-Type", "application/json")
+                .build();
+        HttpResponse<String> postBalanceResponse = sendRequest(changeBalanceRequest);
+        int statusCode = postBalanceResponse.statusCode();
+        Assert.assertEquals(HttpStatus.CREATED.value(), statusCode);
+
+        HttpResponse<String> clientResponse = sendRequest(getRequest("http://localhost:8080/bank/v2/clients/" + clientId));
+        JsonNode jsonNode = new ObjectMapper().readTree(clientResponse.body());
+        int currentBalance = jsonNode.get("balance").get("EUR").asInt();
+        Assert.assertEquals(transaction, currentBalance);
+    }
+
 
     @Test
     public void nullAmount() throws URISyntaxException, IOException, InterruptedException {

@@ -7,6 +7,7 @@ import bank.domain.Client;
 import bank.application.exceptions.RepositoryError;
 import bank.infrastructure.web.dto.ClientDto;
 import bank.infrastructure.web.dto.MoneyDto;
+import bank.infrastructure.web.dto.MoneyDtoV2;
 import bank.infrastructure.web.dto.TransactionDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -67,6 +68,16 @@ public class BankController {
         return bankService.getTransactions(clientId)
                 .stream().map(TransactionDto::toDto)
                 .collect(Collectors.toList());
+    }
+
+    @PostMapping("/bank/v2/clients/{clientId}/transactions/")
+    public ResponseEntity<Void> changeBalanceV2 (@PathVariable("clientId") UUID clientId, @RequestBody MoneyDtoV2 transaction) {
+        if (clientId == null) {
+            throw new IllegalClientIdException("INCORRECT ID");
+        }
+        bankService.changeBalance(clientId, transaction.getCurrency(), transaction.getAmount());
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
 }

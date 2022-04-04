@@ -57,6 +57,17 @@ public class RepositoryTest {
     }
 
     @Test
+    public void testClientEURTransaction() {
+        Client client = new Client();
+        repository.saveClient(client);
+        Client returnedClient = repository.getClientById(client.getID());
+        client.changeBalance(200, Currency.EUR, new Date());
+        repository.saveClient(returnedClient);
+        Client newReturnedClient = repository.getClientById(client.getID());
+        Assert.assertEquals(200, newReturnedClient.getMoneyAccountBalance(Currency.EUR));
+    }
+
+    @Test
     public void testEmptyClient() {
         Client client = new Client();
         repository.saveClient(client);

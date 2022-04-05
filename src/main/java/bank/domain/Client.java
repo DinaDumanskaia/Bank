@@ -48,7 +48,11 @@ public class Client {
     }
 
     public int getBalance() {
-        return getMoneyAccountBalance(Currency.RUB);
+        return getBalance(Currency.RUB);
+    }
+
+    public int getBalance(Currency currency) {
+        return getMoneyAccountBalance(currency);
     }
 
     @Override

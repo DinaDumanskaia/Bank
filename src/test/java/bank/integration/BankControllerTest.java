@@ -214,4 +214,20 @@ public class BankControllerTest {
         return objectMapper.readValue(json, ClientDto.class);
     }
 
+    @Test
+    public void checkBalanceOfCreatedClientIsZeroV2() throws Exception {
+        Client client = new Client();
+
+        client.changeBalance(123, Currency.EUR, new Date());
+        Mockito.doReturn(client).when(bankService).getClientById(client.getID());
+
+        String expected = "{\"id\":\"" + client.getID() + "\", \"accounts\":{\"EUR\":123}}";
+
+        MvcResult getClientResult = mvc.perform(get("/bank/v2/clients/" + client.getID().toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expected))
+                .andReturn();
+
+    }
+
 }

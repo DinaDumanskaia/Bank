@@ -6,6 +6,8 @@ import bank.application.exceptions.IllegalClientIdException;
 import bank.domain.Client;
 import bank.application.exceptions.RepositoryError;
 import bank.infrastructure.web.dto.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -78,7 +80,7 @@ public class BankController {
     }
 
     @GetMapping("/bank/v2/clients/{clientId}")
-    public ClientDtoV2 getBalance(@PathVariable("clientId") String uuidStr) {
+    public ClientDtoV2 getClientV2(@PathVariable("clientId") String uuidStr) throws JsonProcessingException {
         Client client = bankService.getClientById(getUuid(uuidStr));
         if (client == null) {
             throw new ClientNotFoundException("CLIENT NOT FOUND");

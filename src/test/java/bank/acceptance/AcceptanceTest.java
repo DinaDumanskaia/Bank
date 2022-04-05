@@ -1,5 +1,6 @@
 package bank.acceptance;
 
+import bank.domain.Currency;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -138,7 +139,7 @@ public class AcceptanceTest {
                 .GET()
                 .build());
         JsonNode jsonNode = new ObjectMapper().readTree(clientResponse.body());
-        int currentBalance = jsonNode.get("balance").get("EUR").asInt();
+        int currentBalance = jsonNode.get("accounts").get("EUR").asInt();
         Assert.assertEquals(transaction, currentBalance);
     }
 

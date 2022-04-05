@@ -14,7 +14,7 @@ public class ClientDto {
     @JsonCreator
     public ClientDto(
             @JsonProperty("id") UUID id,
-            @JsonProperty("balance") int balance) {
+            @JsonProperty("balance") Integer balance) {
         this.id = id;
         this.balance = balance;
     }

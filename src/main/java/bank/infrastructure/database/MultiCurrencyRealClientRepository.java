@@ -173,7 +173,6 @@ public class MultiCurrencyRealClientRepository implements ClientRepository {
 
     private void persistTransactions( Map<Currency, MoneyAccount> moneyAccounts) throws SQLException {
         for (Map.Entry<Currency, MoneyAccount> moneyAccountEntry : moneyAccounts.entrySet()) {
-            Currency currency = moneyAccountEntry.getKey();
             MoneyAccount moneyAccount = moneyAccountEntry.getValue();
 
             for (Transaction transaction : moneyAccount.getMoneyAccountTransactionList()) {

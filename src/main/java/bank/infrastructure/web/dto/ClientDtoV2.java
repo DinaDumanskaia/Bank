@@ -18,10 +18,8 @@ public class ClientDtoV2 {
 
     @JsonCreator
     public ClientDtoV2(
-            @JsonProperty("id") UUID id
-            ,
-            @JsonProperty("accounts") Map<String, Integer> accounts
-            ) {
+            @JsonProperty("id") UUID id,
+            @JsonProperty("accounts") Map<String, Integer> accounts) {
 
         this.id = id;
         this.accounts = accounts;
@@ -31,13 +29,16 @@ public class ClientDtoV2 {
         if (client == null) {
             throw new ClientNotFoundException("CLIENT NOT FOUND");
         }
+        return new ClientDtoV2(client.getID(), getBalances(client));
+    }
+
+    private static Map<String, Integer> getBalances(Client client) {
         Map<String, Integer> balances = new HashMap<>();
         Map<Currency, MoneyAccount> moneyAccounts = client.getMoneyAccounts();
-        for (Map.Entry<Currency, MoneyAccount> moneyAccountEntry : moneyAccounts.entrySet()) {
-            balances.put(moneyAccountEntry.getKey().name(), moneyAccountEntry.getValue().getBalance());
+        for (Currency currency : moneyAccounts.keySet()) {
+            balances.put(currency.name(), moneyAccounts.get(currency).getBalance());
         }
-
-        return new ClientDtoV2(client.getID(), balances);
+        return balances;
     }
 
     public UUID getId() {

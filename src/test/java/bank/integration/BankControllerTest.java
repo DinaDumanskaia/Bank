@@ -223,11 +223,10 @@ public class BankControllerTest {
 
         String expected = "{\"id\":\"" + client.getID() + "\", \"accounts\":{\"EUR\":123}}";
 
-        MvcResult getClientResult = mvc.perform(get("/bank/v2/clients/" + client.getID().toString()))
+        mvc.perform(get("/bank/v2/clients/" + client.getID().toString()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expected))
                 .andReturn();
-
     }
 
 }

@@ -5,10 +5,7 @@ import bank.application.exceptions.ClientNotFoundException;
 import bank.application.exceptions.IllegalClientIdException;
 import bank.domain.Client;
 import bank.application.exceptions.RepositoryError;
-import bank.infrastructure.web.dto.ClientDto;
-import bank.infrastructure.web.dto.MoneyDto;
-import bank.infrastructure.web.dto.MoneyDtoV2;
-import bank.infrastructure.web.dto.TransactionDto;
+import bank.infrastructure.web.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -80,4 +77,12 @@ public class BankController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @GetMapping("/bank/v2/clients/{clientId}")
+    public ClientDtoV2 getBalance(@PathVariable("clientId") String uuidStr) {
+        Client client = bankService.getClientById(getUuid(uuidStr));
+        if (client == null) {
+            throw new ClientNotFoundException("CLIENT NOT FOUND");
+        }
+        return ClientDtoV2.toDto(client);
+    }
 }

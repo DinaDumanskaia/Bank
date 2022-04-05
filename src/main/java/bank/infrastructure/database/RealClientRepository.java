@@ -14,7 +14,6 @@ import java.sql.*;
 import java.util.*;
 import java.util.Date;
 
-@Repository
 public class RealClientRepository implements ClientRepository {
     private final String DB_URL = "jdbc:h2:tcp://localhost/~/test";
     private final Connection connection;

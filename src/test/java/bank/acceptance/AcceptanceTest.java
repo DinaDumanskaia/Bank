@@ -133,7 +133,10 @@ public class AcceptanceTest {
         int statusCode = postBalanceResponse.statusCode();
         Assert.assertEquals(HttpStatus.CREATED.value(), statusCode);
 
-        HttpResponse<String> clientResponse = sendRequest(getRequest("http://localhost:8080/bank/v2/clients/" + clientId));
+        HttpResponse<String> clientResponse = sendRequest(HttpRequest.newBuilder()
+                .uri(new URI("http://localhost:8080/bank/v2/clients/" + clientId))
+                .GET()
+                .build());
         JsonNode jsonNode = new ObjectMapper().readTree(clientResponse.body());
         int currentBalance = jsonNode.get("balance").get("EUR").asInt();
         Assert.assertEquals(transaction, currentBalance);

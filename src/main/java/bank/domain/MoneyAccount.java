@@ -19,7 +19,7 @@ public class MoneyAccount {
         this.transactions = transactions;
     }
 
-    public int getBalance() {
+    public Integer getBalance() {
         int balance = 0;
         for (Transaction transaction : transactions) {
             balance += transaction.getAmount();

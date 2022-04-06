@@ -1,5 +1,6 @@
 package bank.acceptance;
 
+import bank.domain.Currency;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -11,12 +12,11 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AcceptanceTest {
-    private final WebClient2 webClient2 = new WebClient2();
+    private final WebClient webClient = new WebClient();
 
     @BeforeClass
     public static void setUp() throws InterruptedException, IOException {
@@ -26,62 +26,74 @@ public class AcceptanceTest {
 
     @Test
     public void whenClientWasCreated_ShouldExists() throws IOException, URISyntaxException, InterruptedException {
-        String clientId = webClient2.createClient();
-        Assertions.assertTrue(webClient2.checkClientExists(clientId));
+        String clientId = webClient.createClient();
+        Assertions.assertTrue(webClient.checkClientExists(clientId));
     }
 
     @Test
     public void whenClientIsNotCreated_ShouldReturnNotFound() throws IOException, URISyntaxException, InterruptedException {
-        Assertions.assertFalse(webClient2.checkClientExists(String.valueOf(UUID.randomUUID())));
+        Assertions.assertFalse(webClient.checkClientExists(String.valueOf(UUID.randomUUID())));
     }
 
     @Test
     public void afterPostingTransaction_BalanceShouldChangeByTransactionAmount() throws URISyntaxException, IOException, InterruptedException {
-        String clientId = webClient2.createClient();
+        String clientId = webClient.createClient();
 
-        webClient2.changeBalance(100, clientId);
+        webClient.changeBalance(100, clientId);
 
-        Assert.assertEquals(100, webClient2.getBalance(clientId));
+        Assert.assertEquals(100, webClient.getBalance(clientId));
     }
 
     @Test
     public void afterPostingTransactionEUR_BalanceShouldChangeByTransactionAmount() throws URISyntaxException, IOException, InterruptedException {
-        String clientId = webClient2.createClient();
+        String clientId = webClient.createClient();
 
-        webClient2.changeBalanceWithCurrency(100, clientId,"EUR");
+        webClient.changeBalanceWithCurrency(100, clientId,"EUR");
 
-        Assert.assertEquals(100, webClient2.getBalanceByCurrency(clientId, "EUR"));
+        Assert.assertEquals(100, webClient.getBalanceByCurrency(clientId, "EUR"));
     }
 
 
     @Test
     public void nullAmount() throws URISyntaxException, IOException, InterruptedException {
         Integer transaction = null;
-        String clientId = webClient2.createClient();
+        String clientId = webClient.createClient();
 
-        webClient2.changeBalance(transaction, clientId);
+        webClient.changeBalance(transaction, clientId);
 
-        Integer currentBalance = webClient2.getBalance(clientId);
+        Integer currentBalance = webClient.getBalance(clientId);
         Assert.assertNotNull(currentBalance);
     }
 
     @Test
     public void testIfTransactionMakesBalanceNegative_TransactionFailBalanceNotChanging() throws IOException, URISyntaxException, InterruptedException {
-        String id = webClient2.createClient();
-        webClient2.changeBalance(10, id);
+        String id = webClient.createClient();
+        webClient.changeBalance(10, id);
 
-        webClient2.changeBalance(-100, id);
+        webClient.changeBalance(-100, id);
 
-        Assert.assertEquals(10, webClient2.getBalance(id));
+        Assert.assertEquals(10, webClient.getBalance(id));
     }
 
     @Test
-    public void getRUBTransactionsList() throws IOException, URISyntaxException, InterruptedException {
-        String id = webClient2.createClient();
-        webClient2.changeBalance(10, id);
-        webClient2.changeBalance(500, id);
+    public void getRUBTransactionsAmountList() throws IOException, URISyntaxException, InterruptedException {
+        String id = webClient.createClient();
+        webClient.changeBalance(10, id);
+        webClient.changeBalance(500, id);
 
-        List<Integer> listOfAmounts = webClient2.getListOfTransactionAmounts(id);
+        List<Integer> listOfAmounts = webClient.getListOfTransactionAmounts(id);
+
+        assertEquals(10, listOfAmounts.get(0));
+        assertEquals(500, listOfAmounts.get(1));
+    }
+
+    @Test
+    public void getEURTransactionAmountsList() throws IOException, URISyntaxException, InterruptedException {
+        String id = webClient.createClient();
+        webClient.changeBalance(10, id, "EUR");
+        webClient.changeBalance(500, id, "EUR");
+
+        List<Integer> listOfAmounts = webClient.getListOfTransactionAmountsV2(id, "EUR");
 
         assertEquals(10, listOfAmounts.get(0));
         assertEquals(500, listOfAmounts.get(1));
@@ -89,25 +101,25 @@ public class AcceptanceTest {
 
     @Test
     public void checkTransactionDate() throws IOException, URISyntaxException, InterruptedException, ParseException {
-        String id = webClient2.createClient();
+        String id = webClient.createClient();
 
         long start = System.currentTimeMillis();
-        webClient2.changeBalance(100, id);
+        webClient.changeBalance(100, id);
         long finish = System.currentTimeMillis();
 
-        Date date = webClient2.getFirstTransactionDate(id);
+        Date date = webClient.getFirstTransactionDate(id);
         Assert.assertTrue(start <= date.getTime());
         Assert.assertTrue(finish >= date.getTime());
     }
 
     @Test
     public void testStartCreateChangeBalanceKillStartCheckBalance() throws IOException, URISyntaxException, InterruptedException {
-        String clientId = webClient2.createClient();
-        webClient2.changeBalance(10, clientId);
+        String clientId = webClient.createClient();
+        webClient.changeBalance(10, clientId);
 
         Infrastructure.kill();
         Infrastructure.startApp();
 
-        Assert.assertEquals(10, webClient2.getBalance(clientId));
+        Assert.assertEquals(10, webClient.getBalance(clientId));
     }
 }

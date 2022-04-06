@@ -48,7 +48,9 @@ public class BankControllerTestV2 {
         ResultMatcher matcher = (result) ->
                 AssertionErrors.assertEquals("Status", HttpStatus.CREATED.value(),
                         result.getResponse().getStatus());
+
         String urlTemplate = "/bank/v2/clients/" + client.getID().toString() + "/transactions/";
+
         String moneyDto = "{\"amount\":\"" + TRANSFERRED_MONEY_VALUE + "\", \"currency\":\"EUR\"}";
 
         mvc.perform(

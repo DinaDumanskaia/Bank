@@ -126,7 +126,7 @@ public class WebClient2 {
         return postBalanceResponse.statusCode();
     }
 
-    HttpResponse<String> changeEuroBalance(int transaction, String clientId, String currency) throws IOException, InterruptedException, URISyntaxException {
+    HttpResponse<String> changeBalanceWithCurrency(int transaction, String clientId, String currency) throws IOException, InterruptedException, URISyntaxException {
         return sendRequest(createChangeBalanceRequest(composeURLString(clientId),
                 createJSONChangeBalanceRequestBodyByCurrency(transaction, currency)));
     }
@@ -144,12 +144,10 @@ public class WebClient2 {
     }
 
     HttpResponse<String> getTransactionsResponse(int transaction, String id) throws InterruptedException, IOException, URISyntaxException {
-        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
-        changeBalance(transaction, id);
         return sendRequest(getRequest("http://localhost:8080/bank/v1/clients/" + id + "/transactions/"));
     }
 
-    List<Integer> getListOfAmounts(String id) throws IOException, InterruptedException, URISyntaxException {
+    List<Integer> getListOfTransactionAmounts(String id) throws IOException, InterruptedException, URISyntaxException {
         List<Integer> list = new ArrayList<>();
         JsonNode jsonNode = new ObjectMapper().readTree(getTransactionJson(id));
         if (jsonNode.isArray()) {
@@ -173,5 +171,9 @@ public class WebClient2 {
 
     String getTransactionJson(String id) throws IOException, InterruptedException, URISyntaxException {
         return sendRequest(getRequest("http://localhost:8080/bank/v1/clients/" + id + "/transactions/")).body();
+    }
+
+    Date getFirstTransactionDate(String id) throws ParseException, InterruptedException, IOException, URISyntaxException {
+        return getDateFormat(getTransactionsResponse(10, id));
     }
 }

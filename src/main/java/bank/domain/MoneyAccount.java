@@ -3,6 +3,7 @@ package bank.domain;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
 public class MoneyAccount {
 
     private final UUID accountId;

@@ -1,10 +1,8 @@
 package bank.integration;
 
 import bank.application.BankService;
-import bank.domain.Client;
+import bank.domain.*;
 import bank.domain.Currency;
-import bank.domain.MoneyAccount;
-import bank.domain.NegativeBalanceException;
 import bank.infrastructure.web.v1.ClientDto;
 import bank.infrastructure.web.v1.MoneyDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -178,6 +176,23 @@ public class BankControllerTest {
         assertEquals(TRANSFERRED_MONEY_VALUE, client.getListOfTransactions().get(0).getAmount());
         assertEquals((TRANSFERRED_MONEY_VALUE * 2), client.getListOfTransactions().get(1).getAmount());
     }
+
+    @Test
+    public void whenGetTransactionsByCurrency_thenTransactions() throws Exception {
+        Date date = new Date();
+        Client client = new Client();
+
+        client.changeBalance(123, Currency.EUR, date);
+        Mockito.doReturn(client).when(bankService).getClientById(client.getID());
+
+
+        String transactionsJson = "{\"EUR\":[{\"amount\":123,\"date\":\"" + date.toString() + "\"}]}";
+        mvc.perform(get("/bank/v2/clients/" + client.getID() + "/transactions/"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(transactionsJson))
+                .andReturn();
+    }
+
 
     @Test
     public void getTransactionDate() throws Exception {

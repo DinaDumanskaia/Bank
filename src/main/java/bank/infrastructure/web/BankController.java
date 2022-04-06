@@ -6,6 +6,8 @@ import bank.application.exceptions.IllegalClientIdException;
 import bank.domain.Client;
 import bank.application.exceptions.RepositoryError;
 import bank.domain.Currency;
+import bank.domain.MoneyAccount;
+import bank.domain.Transaction;
 import bank.infrastructure.web.v1.ClientDto;
 import bank.infrastructure.web.v1.MoneyDto;
 import bank.infrastructure.web.v2.ClientDtoV2;
@@ -16,7 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -95,12 +99,20 @@ public class BankController {
     }
 
     @GetMapping("/bank/v2/clients/{clientId}/transactions/")
-    public List<TransactionDto> getListOfTransactionsV2(@PathVariable("clientId") UUID clientId) {
+    public Map<String, List<TransactionDto>> getListOfTransactionsV2(@PathVariable("clientId") UUID clientId) {
         if (clientId == null) {
             throw new IllegalClientIdException("INCORRECT ID");
         }
-        return bankService.getTransactions(clientId)
-                .stream().map(TransactionDto::toDto)
-                .collect(Collectors.toList());
+        Client client = bankService.getClientById(clientId);
+        Map<Currency, MoneyAccount> map = client.getMoneyAccounts();
+        Map<String, List<TransactionDto>> map1 = new HashMap<>();
+        for (Currency currency : map.keySet()) {
+            List<Transaction> list = map.get(currency).getMoneyAccountTransactionList();
+            List<TransactionDto> transactionDtos = list.stream().map(TransactionDto::toDto)
+                    .collect(Collectors.toList());
+
+            map1.put(currency.name(), transactionDtos);
+        }
+        return map1;
     }
 }

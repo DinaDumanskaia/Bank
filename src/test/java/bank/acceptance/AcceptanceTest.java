@@ -123,24 +123,30 @@ public class AcceptanceTest {
         int transaction = 100;
         String clientId = postClient();
 
-        String urlInputString = "http://localhost:8080/bank/v2/clients/" + clientId + "/transactions/";
-        String requestBody = "{\"amount\":\"" + transaction + "\", \"currency\":\"EUR\"}";
-        HttpRequest changeBalanceRequest = HttpRequest.newBuilder()
-                .uri(new URI(urlInputString))
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .header("Content-Type", "application/json")
-                .build();
-        HttpResponse<String> postBalanceResponse = sendRequest(changeBalanceRequest);
-        int statusCode = postBalanceResponse.statusCode();
+        int statusCode = sendRequest(createChangeBalanceRequest(composeURLString(clientId),
+                createJSONChangeBalanceRequestBodyByCurrency(transaction, Currency.EUR))).statusCode();
         Assert.assertEquals(HttpStatus.CREATED.value(), statusCode);
 
+        int currentBalance = getBalanceByCurrency(clientId, Currency.EUR);
+        Assert.assertEquals(transaction, currentBalance);
+    }
+
+    private String composeURLString(String clientId) {
+        return  "http://localhost:8080/bank/v2/clients/" + clientId + "/transactions/";
+    }
+
+    private int getBalanceByCurrency(String clientId, Currency currency) throws IOException, InterruptedException, URISyntaxException {
+        HttpResponse<String> clientResponse = getClientResponse(clientId);
+        JsonNode jsonNode = new ObjectMapper().readTree(clientResponse.body());
+        return jsonNode.get("accounts").get(currency.name()).asInt();
+    }
+
+    private HttpResponse<String> getClientResponse(String clientId) throws IOException, InterruptedException, URISyntaxException {
         HttpResponse<String> clientResponse = sendRequest(HttpRequest.newBuilder()
                 .uri(new URI("http://localhost:8080/bank/v2/clients/" + clientId))
                 .GET()
                 .build());
-        JsonNode jsonNode = new ObjectMapper().readTree(clientResponse.body());
-        int currentBalance = jsonNode.get("accounts").get("EUR").asInt();
-        Assert.assertEquals(transaction, currentBalance);
+        return clientResponse;
     }
 
 
@@ -232,8 +238,9 @@ public class AcceptanceTest {
     }
 
     private int postTransaction(Integer transaction, String id) throws IOException, InterruptedException, URISyntaxException {
+        String requestBody = createJSONChangeBalanceRequestBody(transaction);
         HttpResponse<String> postBalanceResponse =
-                sendRequest(createChangeBalanceRequest(composeTransactionUrl(id), transaction));
+                sendRequest(createChangeBalanceRequest(composeTransactionUrl(id), requestBody));
         return postBalanceResponse.statusCode();
     }
 
@@ -297,8 +304,7 @@ public class AcceptanceTest {
                 .build();
     }
 
-    private HttpRequest createChangeBalanceRequest(String urlInputString, Integer transaction) throws URISyntaxException {
-        String requestBody = createJSONChangeBalanceRequestBody(transaction);
+    private HttpRequest createChangeBalanceRequest(String urlInputString, String requestBody) throws URISyntaxException {
         return HttpRequest.newBuilder()
                 .uri(new URI(urlInputString))
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
@@ -308,6 +314,10 @@ public class AcceptanceTest {
 
     private String createJSONChangeBalanceRequestBody(Integer transaction) {
         return "{\"amount\":\"" + transaction + "\"}";
+    }
+
+    private String createJSONChangeBalanceRequestBodyByCurrency(Integer transaction, Currency currency) {
+        return "{\"amount\":\"" + transaction + "\", \"currency\":\"" + currency.name() + "\"}";
     }
 
     static class ProcessHandler extends Thread {

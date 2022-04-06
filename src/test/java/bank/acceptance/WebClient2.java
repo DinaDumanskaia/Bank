@@ -1,6 +1,5 @@
 package bank.acceptance;
 
-import bank.domain.Currency;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +13,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -75,11 +76,6 @@ public class WebClient2 {
         return getClientIdFromJson(response.body());
     }
 
-    int getAmountFromTransaction(String jsonBody, int transactionIndex) throws JsonProcessingException {
-        JsonNode jsonNode = new ObjectMapper().readTree(jsonBody);
-        return jsonNode.get(transactionIndex).get("amount").asInt();
-    }
-
     String getDateFromTransaction(String jsonBody, int transactionIndex) throws JsonProcessingException {
         JsonNode jsonNode = new ObjectMapper().readTree(jsonBody);
         return jsonNode.get(transactionIndex).get("date").asText();
@@ -130,6 +126,11 @@ public class WebClient2 {
         return postBalanceResponse.statusCode();
     }
 
+    HttpResponse<String> changeEuroBalance(int transaction, String clientId, String currency) throws IOException, InterruptedException, URISyntaxException {
+        return sendRequest(createChangeBalanceRequest(composeURLString(clientId),
+                createJSONChangeBalanceRequestBodyByCurrency(transaction, currency)));
+    }
+
     HttpRequest createChangeBalanceRequest(String urlInputString, String requestBody) throws URISyntaxException {
         return HttpRequest.newBuilder()
                 .uri(new URI(urlInputString))
@@ -148,9 +149,29 @@ public class WebClient2 {
         return sendRequest(getRequest("http://localhost:8080/bank/v1/clients/" + id + "/transactions/"));
     }
 
+    List<Integer> getListOfAmounts(String id) throws IOException, InterruptedException, URISyntaxException {
+        List<Integer> list = new ArrayList<>();
+        JsonNode jsonNode = new ObjectMapper().readTree(getTransactionJson(id));
+        if (jsonNode.isArray()) {
+            for (JsonNode arrayItem : jsonNode) {
+                list.add(arrayItem.get("amount").intValue());
+            }
+        }
+        return list;
+    }
+
+    int getAmountFromTransaction(String jsonBody, int transactionIndex) throws JsonProcessingException {
+        JsonNode jsonNode = new ObjectMapper().readTree(jsonBody);
+        return jsonNode.get(transactionIndex).get("amount").asInt();
+    }
+
     int getBalanceByCurrency(String clientId, String currency) throws IOException, InterruptedException, URISyntaxException {
         HttpResponse<String> clientResponse = getClientResponse(clientId);
         JsonNode jsonNode = new ObjectMapper().readTree(clientResponse.body());
         return jsonNode.get("accounts").get(currency).asInt();
+    }
+
+    String getTransactionJson(String id) throws IOException, InterruptedException, URISyntaxException {
+        return sendRequest(getRequest("http://localhost:8080/bank/v1/clients/" + id + "/transactions/")).body();
     }
 }

@@ -4,14 +4,16 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AcceptanceTest {
     private final WebClient2 webClient2 = new WebClient2();
@@ -44,15 +46,11 @@ public class AcceptanceTest {
 
     @Test
     public void afterPostingTransactionEUR_BalanceShouldChangeByTransactionAmount() throws URISyntaxException, IOException, InterruptedException {
-        int transaction = 100;
         String clientId = webClient2.postClient();
 
-        int statusCode = webClient2.sendRequest(webClient2.createChangeBalanceRequest(webClient2.composeURLString(clientId),
-                webClient2.createJSONChangeBalanceRequestBodyByCurrency(transaction, "EUR"))).statusCode();
-        Assert.assertEquals(HttpStatus.CREATED.value(), statusCode);
+        webClient2.changeEuroBalance(100, clientId,"EUR");
 
-        int currentBalance = webClient2.getBalanceByCurrency(clientId, "EUR");
-        Assert.assertEquals(transaction, currentBalance);
+        Assert.assertEquals(100, webClient2.getBalanceByCurrency(clientId, "EUR"));
     }
 
 
@@ -61,8 +59,7 @@ public class AcceptanceTest {
         Integer transaction = null;
         String clientId = webClient2.createClient();
 
-        int statusCode = webClient2.changeBalance(transaction, clientId);
-        Assert.assertEquals(HttpStatus.CREATED.value(), statusCode);
+        webClient2.changeBalance(transaction, clientId);
 
         Integer currentBalance = webClient2.getBalance(clientId);
         Assert.assertNotNull(currentBalance);
@@ -70,31 +67,24 @@ public class AcceptanceTest {
 
     @Test
     public void testIfTransactionMakesBalanceNegative_TransactionFailBalanceNotChanging() throws IOException, URISyntaxException, InterruptedException {
-        int firstTransaction = 10;
-        int secondTransaction = -100;
-
         String id = webClient2.createClient();
-        webClient2.changeBalance(firstTransaction, id);
+        webClient2.changeBalance(10, id);
 
-        int statusCodeAfterSecondTransaction = webClient2.changeBalance(secondTransaction, id);
-        Assert.assertEquals(HttpStatus.BAD_REQUEST.value(), statusCodeAfterSecondTransaction);
+        webClient2.changeBalance(-100, id);
 
-        int currentBalance = webClient2.getBalance(id);
-        Assert.assertEquals(firstTransaction, currentBalance);
+        Assert.assertEquals(10, webClient2.getBalance(id));
     }
 
     @Test
-    public void getTransactionsList() throws IOException, URISyntaxException, InterruptedException {
-        int firstTransaction = 10;
-        int secondTransaction = 500;
-
+    public void getRUBTransactionsList() throws IOException, URISyntaxException, InterruptedException {
         String id = webClient2.createClient();
-        webClient2.changeBalance(firstTransaction, id);
-        webClient2.changeBalance(secondTransaction, id);
+        webClient2.changeBalance(10, id);
+        webClient2.changeBalance(500, id);
 
-        HttpResponse<String> response = webClient2.sendRequest(webClient2.getRequest("http://localhost:8080/bank/v1/clients/" + id + "/transactions/"));
-        Assert.assertEquals(firstTransaction, webClient2.getAmountFromTransaction(response.body(), 0));
-        Assert.assertEquals(secondTransaction, webClient2.getAmountFromTransaction(response.body(), 1));
+        List<Integer> listOfAmounts = webClient2.getListOfAmounts(id);
+
+        assertEquals(10, listOfAmounts.get(0));
+        assertEquals(500, listOfAmounts.get(1));
     }
 
     @Test

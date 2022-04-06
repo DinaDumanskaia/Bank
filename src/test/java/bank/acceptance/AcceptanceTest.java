@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
@@ -22,7 +23,6 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static java.lang.Thread.sleep;
 import static java.net.http.HttpRequest.BodyPublishers.noBody;
 
 public class AcceptanceTest {
@@ -34,14 +34,22 @@ public class AcceptanceTest {
 
     @Test
     public void whenClientWasCreated_ShouldExists() throws IOException, URISyntaxException, InterruptedException {
+        String clientId = createClient();
+        Assertions.assertTrue(checkClientExists(clientId));
+    }
+
+    private boolean checkClientExists(String clientId) throws IOException, InterruptedException, URISyntaxException {
+        return checkHead("http://localhost:8080/bank/v1/clients/" + clientId).equals(HttpStatus.OK.value());
+    }
+
+    private String createClient() throws IOException, InterruptedException, URISyntaxException {
         final HttpResponse<String> response = sendRequest(postRequest("http://localhost:8080/bank/v1/clients/"));
-        String id = getClientIdFromJson(response.body());
-        Assert.assertEquals(HttpStatus.OK.value(), checkHead("http://localhost:8080/bank/v1/clients/" + id));
+        return getClientIdFromJson(response.body());
     }
 
     @Test
     public void whenClientIsNotCreated_ShouldReturnNotFound() throws IOException, URISyntaxException, InterruptedException {
-        Assert.assertEquals(HttpStatus.NOT_FOUND.value(), checkHead("http://localhost:8080/bank/v1/clients/" + UUID.randomUUID()));
+        Assertions.assertFalse(checkClientExists(String.valueOf(UUID.randomUUID())));
     }
 
     @Test
@@ -217,7 +225,7 @@ public class AcceptanceTest {
         return jsonNode.get("balance").asInt();
     }
 
-    private int checkHead(String urlInputString) throws IOException, InterruptedException, URISyntaxException {
+    private Integer checkHead(String urlInputString) throws IOException, InterruptedException, URISyntaxException {
         return sendRequest(headRequest(urlInputString)).statusCode();
     }
 

@@ -1,9 +1,5 @@
 package bank.acceptance;
 
-import bank.domain.Currency;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -11,21 +7,15 @@ import org.junit.jupiter.api.Assertions;
 import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import static java.net.http.HttpRequest.BodyPublishers.noBody;
 
 public class AcceptanceTest {
+    private final WebClient2 webClient2 = new WebClient2();
+
     @BeforeClass
     public static void setUp() throws InterruptedException, IOException {
         Infrastructure.startApp();
@@ -34,83 +24,56 @@ public class AcceptanceTest {
 
     @Test
     public void whenClientWasCreated_ShouldExists() throws IOException, URISyntaxException, InterruptedException {
-        String clientId = createClient();
-        Assertions.assertTrue(checkClientExists(clientId));
-    }
-
-    private boolean checkClientExists(String clientId) throws IOException, InterruptedException, URISyntaxException {
-        return checkHead("http://localhost:8080/bank/v1/clients/" + clientId).equals(HttpStatus.OK.value());
-    }
-
-    private String createClient() throws IOException, InterruptedException, URISyntaxException {
-        final HttpResponse<String> response = sendRequest(postRequest("http://localhost:8080/bank/v1/clients/"));
-        return getClientIdFromJson(response.body());
+        String clientId = webClient2.createClient();
+        Assertions.assertTrue(webClient2.checkClientExists(clientId));
     }
 
     @Test
     public void whenClientIsNotCreated_ShouldReturnNotFound() throws IOException, URISyntaxException, InterruptedException {
-        Assertions.assertFalse(checkClientExists(String.valueOf(UUID.randomUUID())));
+        Assertions.assertFalse(webClient2.checkClientExists(String.valueOf(UUID.randomUUID())));
     }
 
     @Test
     public void whenClientCreated_ShouldHaveZeroBalance() throws URISyntaxException, IOException, InterruptedException {
-        HttpResponse<String> response = sendRequest(postRequest("http://localhost:8080/bank/v1/clients/"));
-        Assert.assertEquals(0, getClientBalanceFromJson(response.body()));
+        HttpResponse<String> response = webClient2.sendRequest(webClient2.postRequest("http://localhost:8080/bank/v1/clients/"));
+        Assert.assertEquals(0, webClient2.getClientBalanceFromJson(response.body()));
     }
 
     @Test
     public void afterPostingTransaction_BalanceShouldChangeByTransactionAmount() throws URISyntaxException, IOException, InterruptedException {
         int transaction = 100;
-        String clientId = postClient();
+        String clientId = webClient2.postClient();
 
-        int statusCode = postTransaction(transaction, clientId);
+        int statusCode = webClient2.postTransaction(transaction, clientId);
         Assert.assertEquals(HttpStatus.CREATED.value(), statusCode);
 
-        int currentBalance = getCurrentBalanceRequest(clientId);
+        int currentBalance = webClient2.getCurrentBalanceRequest(clientId);
         Assert.assertEquals(transaction, currentBalance);
     }
 
     @Test
     public void afterPostingTransactionEUR_BalanceShouldChangeByTransactionAmount() throws URISyntaxException, IOException, InterruptedException {
         int transaction = 100;
-        String clientId = postClient();
+        String clientId = webClient2.postClient();
 
-        int statusCode = sendRequest(createChangeBalanceRequest(composeURLString(clientId),
-                createJSONChangeBalanceRequestBodyByCurrency(transaction, Currency.EUR))).statusCode();
+        int statusCode = webClient2.sendRequest(webClient2.createChangeBalanceRequest(webClient2.composeURLString(clientId),
+                webClient2.createJSONChangeBalanceRequestBodyByCurrency(transaction, "EUR"))).statusCode();
         Assert.assertEquals(HttpStatus.CREATED.value(), statusCode);
 
-        int currentBalance = getBalanceByCurrency(clientId, Currency.EUR);
+        int currentBalance = webClient2.getBalanceByCurrency(clientId, "EUR");
         Assert.assertEquals(transaction, currentBalance);
-    }
-
-    private String composeURLString(String clientId) {
-        return  "http://localhost:8080/bank/v2/clients/" + clientId + "/transactions/";
-    }
-
-    private int getBalanceByCurrency(String clientId, Currency currency) throws IOException, InterruptedException, URISyntaxException {
-        HttpResponse<String> clientResponse = getClientResponse(clientId);
-        JsonNode jsonNode = new ObjectMapper().readTree(clientResponse.body());
-        return jsonNode.get("accounts").get(currency.name()).asInt();
-    }
-
-    private HttpResponse<String> getClientResponse(String clientId) throws IOException, InterruptedException, URISyntaxException {
-        HttpResponse<String> clientResponse = sendRequest(HttpRequest.newBuilder()
-                .uri(new URI("http://localhost:8080/bank/v2/clients/" + clientId))
-                .GET()
-                .build());
-        return clientResponse;
     }
 
 
     @Test
     public void nullAmount() throws URISyntaxException, IOException, InterruptedException {
         Integer transaction = null;
-        String clientId = postClient();
+        String clientId = webClient2.postClient();
 
-        int statusCode = postTransaction(transaction, clientId);
+        int statusCode = webClient2.postTransaction(transaction, clientId);
         Assert.assertEquals(HttpStatus.CREATED.value(), statusCode);
 
-        Integer currentBalance = getCurrentBalanceRequest(clientId);
+        Integer currentBalance = webClient2.getCurrentBalanceRequest(clientId);
         Assert.assertNotNull(currentBalance);
     }
 
@@ -119,13 +82,13 @@ public class AcceptanceTest {
         int firstTransaction = 10;
         int secondTransaction = -100;
 
-        String id = postClient();
-        postTransaction(firstTransaction, id);
+        String id = webClient2.postClient();
+        webClient2.postTransaction(firstTransaction, id);
 
-        int statusCodeAfterSecondTransaction = postTransaction(secondTransaction, id);
+        int statusCodeAfterSecondTransaction = webClient2.postTransaction(secondTransaction, id);
         Assert.assertEquals(HttpStatus.BAD_REQUEST.value(), statusCodeAfterSecondTransaction);
 
-        int currentBalance = getCurrentBalanceRequest(id);
+        int currentBalance = webClient2.getCurrentBalanceRequest(id);
         Assert.assertEquals(firstTransaction, currentBalance);
     }
 
@@ -134,142 +97,41 @@ public class AcceptanceTest {
         int firstTransaction = 10;
         int secondTransaction = 500;
 
-        String id = postClient();
-        postTransaction(firstTransaction, id);
-        postTransaction(secondTransaction, id);
+        String id = webClient2.postClient();
+        webClient2.postTransaction(firstTransaction, id);
+        webClient2.postTransaction(secondTransaction, id);
 
-        HttpResponse<String> response = sendRequest(getRequest("http://localhost:8080/bank/v1/clients/" + id + "/transactions/"));
-        Assert.assertEquals(firstTransaction, getAmountFromTransaction(response.body(), 0));
-        Assert.assertEquals(secondTransaction, getAmountFromTransaction(response.body(), 1));
+        HttpResponse<String> response = webClient2.sendRequest(webClient2.getRequest("http://localhost:8080/bank/v1/clients/" + id + "/transactions/"));
+        Assert.assertEquals(firstTransaction, webClient2.getAmountFromTransaction(response.body(), 0));
+        Assert.assertEquals(secondTransaction, webClient2.getAmountFromTransaction(response.body(), 1));
     }
 
     @Test
     public void checkTransactionDate() throws IOException, URISyntaxException, InterruptedException, ParseException {
         // Given
         int transaction = 10;
-        String id = postClient();
+        String id = webClient2.postClient();
 
         // When
         long start = System.currentTimeMillis();
-        HttpResponse<String> response = getTransactionsResponse(transaction, id);
+        HttpResponse<String> response = webClient2.getTransactionsResponse(transaction, id);
         long finish = System.currentTimeMillis();
 
         // Then
-        Date date = getDateFormat(response);
+        Date date = webClient2.getDateFormat(response);
 
         Assert.assertTrue(start < date.getTime());
         Assert.assertTrue(finish > date.getTime());
     }
 
-    private Date getDateFormat(HttpResponse<String> response) throws ParseException, JsonProcessingException {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zz yyyy", Locale.US);
-        return simpleDateFormat.parse(getDateFromTransaction(response.body(), 0));
-    }
-
-    private HttpResponse<String> getTransactionsResponse(int transaction, String id) throws InterruptedException, IOException, URISyntaxException {
-        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
-        postTransaction(transaction, id);
-        return sendRequest(getRequest("http://localhost:8080/bank/v1/clients/" + id + "/transactions/"));
-    }
-
     @Test
     public void testStartCreateChangeBalanceKillStartCheckBalance() throws IOException, URISyntaxException, InterruptedException {
-        String clientId = postClient();
-        postTransaction(10, clientId);
+        String clientId = webClient2.postClient();
+        webClient2.postTransaction(10, clientId);
 
         Infrastructure.kill();
 
         setUp();
-        Assert.assertEquals(10, getCurrentBalanceRequest(clientId));
+        Assert.assertEquals(10, webClient2.getCurrentBalanceRequest(clientId));
     }
-
-
-    private int getCurrentBalanceRequest(String id) throws IOException, InterruptedException, URISyntaxException {
-        HttpResponse<String> clientResponse = sendRequest(getRequest("http://localhost:8080/bank/v1/clients/" + id));
-        return getClientBalanceFromJson(clientResponse.body());
-    }
-
-    private int postTransaction(Integer transaction, String id) throws IOException, InterruptedException, URISyntaxException {
-        String requestBody = createJSONChangeBalanceRequestBody(transaction);
-        HttpResponse<String> postBalanceResponse =
-                sendRequest(createChangeBalanceRequest(composeTransactionUrl(id), requestBody));
-        return postBalanceResponse.statusCode();
-    }
-
-    private String composeTransactionUrl(String id) {
-        return "http://localhost:8080/bank/v1/clients/" + id + "/transactions/";
-    }
-
-    private String postClient() throws IOException, InterruptedException, URISyntaxException {
-        HttpResponse<String> response = sendRequest(postRequest("http://localhost:8080/bank/v1/clients/"));
-        return getClientIdFromJson(response.body());
-    }
-
-    private String getClientIdFromJson(String jsonBody) throws JsonProcessingException {
-        JsonNode jsonNode = new ObjectMapper().readTree(jsonBody);
-        return jsonNode.get("id").asText();
-    }
-
-    private int getAmountFromTransaction(String jsonBody, int transactionIndex) throws JsonProcessingException {
-        JsonNode jsonNode = new ObjectMapper().readTree(jsonBody);
-        return jsonNode.get(transactionIndex).get("amount").asInt();
-    }
-
-    private String getDateFromTransaction(String jsonBody, int transactionIndex) throws JsonProcessingException {
-        JsonNode jsonNode = new ObjectMapper().readTree(jsonBody);
-        return jsonNode.get(transactionIndex).get("date").asText();
-    }
-
-    private int getClientBalanceFromJson(String jsonBody) throws JsonProcessingException {
-        JsonNode jsonNode = new ObjectMapper().readTree(jsonBody);
-        return jsonNode.get("balance").asInt();
-    }
-
-    private Integer checkHead(String urlInputString) throws IOException, InterruptedException, URISyntaxException {
-        return sendRequest(headRequest(urlInputString)).statusCode();
-    }
-
-    private HttpResponse<String> sendRequest(HttpRequest request) throws IOException, InterruptedException {
-        return HttpClient.newBuilder()
-                .build()
-                .send(request, HttpResponse.BodyHandlers.ofString());
-    }
-
-    private HttpRequest headRequest(String urlInputString) throws URISyntaxException {
-        return HttpRequest.newBuilder()
-                .uri(new URI(urlInputString))
-                .method("HEAD", noBody())
-                .build();
-    }
-
-    private HttpRequest postRequest(String urlInputString) throws URISyntaxException {
-        return HttpRequest.newBuilder()
-                .uri(new URI(urlInputString))
-                .POST(noBody())
-                .build();
-    }
-
-    private HttpRequest getRequest(String urlInputString) throws URISyntaxException {
-        return HttpRequest.newBuilder()
-                .uri(new URI(urlInputString))
-                .GET()
-                .build();
-    }
-
-    private HttpRequest createChangeBalanceRequest(String urlInputString, String requestBody) throws URISyntaxException {
-        return HttpRequest.newBuilder()
-                .uri(new URI(urlInputString))
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .header("Content-Type", "application/json")
-                .build();
-    }
-
-    private String createJSONChangeBalanceRequestBody(Integer transaction) {
-        return "{\"amount\":\"" + transaction + "\"}";
-    }
-
-    private String createJSONChangeBalanceRequestBodyByCurrency(Integer transaction, Currency currency) {
-        return "{\"amount\":\"" + transaction + "\", \"currency\":\"" + currency.name() + "\"}";
-    }
-
 }

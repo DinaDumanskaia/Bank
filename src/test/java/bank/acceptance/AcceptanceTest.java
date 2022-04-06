@@ -90,8 +90,8 @@ public class AcceptanceTest {
     @Test
     public void getEURTransactionAmountsList() throws IOException, URISyntaxException, InterruptedException {
         String id = webClient.createClient();
-        webClient.changeBalance(10, id, "EUR");
-        webClient.changeBalance(500, id, "EUR");
+        webClient.changeBalanceWithCurrency(10, id, "EUR");
+        webClient.changeBalanceWithCurrency(500, id, "EUR");
 
         List<Integer> listOfAmounts = webClient.getListOfTransactionAmountsV2(id, "EUR");
 
@@ -104,12 +104,13 @@ public class AcceptanceTest {
         String id = webClient.createClient();
 
         long start = System.currentTimeMillis();
+        Thread.sleep(1000);
         webClient.changeBalance(100, id);
         long finish = System.currentTimeMillis();
 
         Date date = webClient.getFirstTransactionDate(id);
-        Assert.assertTrue(start <= date.getTime());
-        Assert.assertTrue(finish >= date.getTime());
+        Assert.assertTrue(start < date.getTime());
+        Assert.assertTrue(finish > date.getTime());
     }
 
     @Test

@@ -1,4 +1,4 @@
-package bank.infrastructure.web.dto;
+package bank.infrastructure.web.v1.dto;
 
 public class MoneyDto {
     private Integer amount;

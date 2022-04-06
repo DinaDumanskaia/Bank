@@ -1,13 +1,16 @@
-package bank.infrastructure.web;
+package bank.infrastructure.web.v1;
 
 import bank.application.BankService;
 import bank.application.exceptions.ClientNotFoundException;
 import bank.application.exceptions.IllegalClientIdException;
 import bank.domain.Client;
 import bank.application.exceptions.RepositoryError;
-import bank.infrastructure.web.dto.*;
+import bank.infrastructure.web.v1.dto.ClientDto;
+import bank.infrastructure.web.v1.dto.MoneyDto;
+import bank.infrastructure.web.v1.dto.TransactionDto;
+import bank.infrastructure.web.v2.dto.ClientDtoV2;
+import bank.infrastructure.web.v2.dto.MoneyDtoV2;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

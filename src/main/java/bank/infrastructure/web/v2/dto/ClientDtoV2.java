@@ -1,4 +1,4 @@
-package bank.infrastructure.web.dto;
+package bank.infrastructure.web.v2.dto;
 
 import bank.application.exceptions.ClientNotFoundException;
 import bank.domain.Client;

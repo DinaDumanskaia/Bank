@@ -149,21 +149,19 @@ public class WebClient {
     List<Integer> getListOfTransactionAmounts(String id) throws IOException, InterruptedException, URISyntaxException {
         List<Integer> list = new ArrayList<>();
         JsonNode jsonNode = new ObjectMapper().readTree(getTransactionJson(id));
-        if (jsonNode.isArray()) {
-            for (JsonNode arrayItem : jsonNode) {
-                list.add(arrayItem.get("amount").intValue());
-            }
+        for (JsonNode arrayItem : jsonNode) {
+            list.add(arrayItem.get("amount").intValue());
         }
         return list;
+
+
     }
 
     List<Integer> getListOfTransactionAmountsV2(String id, String currency) throws IOException, InterruptedException, URISyntaxException {
         List<Integer> list = new ArrayList<>();
-        JsonNode jsonNode = new ObjectMapper().readTree(getTransactionJsonV2(id));
-        if (jsonNode.isArray()) {
-            for (JsonNode arrayItem : jsonNode) {
-                list.add(arrayItem.get("amount").intValue());
-            }
+        JsonNode jsonNode = new ObjectMapper().readTree(getTransactionJsonV2(id)).get(currency);
+        for (JsonNode arrayItem : jsonNode) {
+            list.add(arrayItem.get("amount").intValue());
         }
         return list;
     }

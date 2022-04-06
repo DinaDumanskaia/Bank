@@ -11,6 +11,8 @@ class MainPage extends React.Component {
     this.state = {
         value: '',
         balance: null,
+        balanceEUR: null,
+        balanceUSD: null,
         clientId: null,
         buttonCreate: null,
     };
@@ -32,7 +34,13 @@ class MainPage extends React.Component {
     };
     fetch('http://localhost:8080/bank/v1/clients/', requestOptions)
         .then(response => response.json())
-        .then(data => this.setState({ buttonCreate: true, clientId: data.id, balance: data.balance }));
+        .then(data => this.setState({
+                buttonCreate: true,
+                clientId: data.id,
+                balance: 0,
+                balanceEUR: 0,
+                balanceUSD: 0,
+            }));
   }
 
 
@@ -43,10 +51,16 @@ class MainPage extends React.Component {
       if (this.state.value == "") {
           alert("INPUT CLIENT ID");
         } else {
-            const response = await fetch('http://localhost:8080/bank/v1/clients/' + this.state.value);
+            const response = await fetch('http://localhost:8080/bank/v2/clients/' + this.state.value);
             if (response.ok) {
                 const data = await response.json();
-                this.setState({ clientId: data.id, balance: data.balance, buttonCreate: true });
+                this.setState({
+                        clientId: data.id,
+                        buttonCreate: true,
+                        balance: data.accounts['RUB'],
+                        balanceEUR: data.accounts['EUR'],
+                        balanceUSD: data.accounts['USD'],
+                    });
                 return;
             }
             await showError(response);
@@ -85,7 +99,7 @@ class MainPage extends React.Component {
         return (
             <div>
                 {this.main()}
-                <ClientPage clientId={this.state.clientId} balance={this.state.balance} />
+                <ClientPage clientId={this.state.clientId} balance={this.state.balance} balanceEUR={this.state.balanceEUR} balanceUSD={this.state.balanceUSD} />
             </div>
         );
     }
@@ -107,6 +121,8 @@ class ClientPage extends React.Component {
         value2: '',
         clientId : props.clientId,
         balance : props.balance,
+        balanceEUR: props.balanceEUR,
+        balanceUSD: props.balanceUSD,
         buttonTransaction: false,
         value3 : '',
         transactionInfo: [],
@@ -206,6 +222,9 @@ ClientInfo() {
                 <h2>Клиент</h2>
                 <h3>ИД: {this.state.clientId}</h3>
                 <h3>Баланс: {this.state.balance}</h3>
+                <h3>Баланс RUB: {this.state.balance}</h3>
+                <h3>Баланс EUR: {this.state.balanceEUR}</h3>
+                <h3>Баланс USD: {this.state.balanceUSD}</h3>
             </div>
             <div className="column">
                 <form onSubmit={this.handleSubmitBalanceModify}>

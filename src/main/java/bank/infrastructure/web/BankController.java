@@ -1,15 +1,15 @@
-package bank.infrastructure.web.v1;
+package bank.infrastructure.web;
 
 import bank.application.BankService;
 import bank.application.exceptions.ClientNotFoundException;
 import bank.application.exceptions.IllegalClientIdException;
 import bank.domain.Client;
 import bank.application.exceptions.RepositoryError;
-import bank.infrastructure.web.v1.dto.ClientDto;
-import bank.infrastructure.web.v1.dto.MoneyDto;
-import bank.infrastructure.web.v1.dto.TransactionDto;
-import bank.infrastructure.web.v2.dto.ClientDtoV2;
-import bank.infrastructure.web.v2.dto.MoneyDtoV2;
+import bank.domain.Currency;
+import bank.infrastructure.web.v1.ClientDto;
+import bank.infrastructure.web.v1.MoneyDto;
+import bank.infrastructure.web.v2.ClientDtoV2;
+import bank.infrastructure.web.v2.MoneyDtoV2;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -72,16 +72,6 @@ public class BankController {
                 .collect(Collectors.toList());
     }
 
-    @PostMapping("/bank/v2/clients/{clientId}/transactions/")
-    public ResponseEntity<Void> changeBalanceV2 (@PathVariable("clientId") UUID clientId, @RequestBody MoneyDtoV2 transaction) {
-        if (clientId == null) {
-            throw new IllegalClientIdException("INCORRECT ID");
-        }
-        bankService.changeBalance(clientId, transaction.getCurrency(), transaction.getAmount());
-
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
     @GetMapping("/bank/v2/clients/{clientId}")
     public ClientDtoV2 getClientV2(@PathVariable("clientId") String uuidStr) throws JsonProcessingException {
         Client client = bankService.getClientById(getUuid(uuidStr));
@@ -89,5 +79,28 @@ public class BankController {
             throw new ClientNotFoundException("CLIENT NOT FOUND");
         }
         return ClientDtoV2.toDto(client);
+    }
+
+    @PostMapping("/bank/v2/clients/{clientId}/transactions/")
+    public ResponseEntity<Void> changeBalanceV2 (@PathVariable("clientId") UUID clientId, @RequestBody MoneyDtoV2 transaction) {
+        if (clientId == null) {
+            throw new IllegalClientIdException("INCORRECT ID");
+        }
+
+        Currency currency = transaction.getCurrency();
+        int amount = transaction.getAmount();
+        bankService.changeBalance(clientId, transaction.getCurrency(), transaction.getAmount());
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @GetMapping("/bank/v2/clients/{clientId}/transactions/")
+    public List<TransactionDto> getListOfTransactionsV2(@PathVariable("clientId") UUID clientId) {
+        if (clientId == null) {
+            throw new IllegalClientIdException("INCORRECT ID");
+        }
+        return bankService.getTransactions(clientId)
+                .stream().map(TransactionDto::toDto)
+                .collect(Collectors.toList());
     }
 }

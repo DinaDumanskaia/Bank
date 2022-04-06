@@ -1,4 +1,4 @@
-package bank.infrastructure.web.v2.dto;
+package bank.infrastructure.web.v2;
 
 import bank.domain.Currency;
 

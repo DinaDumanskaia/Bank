@@ -58,7 +58,11 @@ public class BankService {
     }
 
     public List<Transaction> getTransactions(UUID id) {
-        return clientRepository.getClientById(id).getListOfTransactions();
+        return getTransactions(id, Currency.RUB);
+    }
+
+    public List<Transaction> getTransactions(UUID id, Currency currency) {
+        return clientRepository.getClientById(id).getMoneyAccounts().get(currency).getMoneyAccountTransactionList();
     }
 
 }

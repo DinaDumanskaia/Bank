@@ -5,8 +5,8 @@ import bank.domain.Client;
 import bank.domain.Currency;
 import bank.domain.MoneyAccount;
 import bank.domain.NegativeBalanceException;
-import bank.infrastructure.web.v1.dto.ClientDto;
-import bank.infrastructure.web.v1.dto.MoneyDto;
+import bank.infrastructure.web.v1.ClientDto;
+import bank.infrastructure.web.v1.MoneyDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
@@ -174,7 +174,6 @@ public class BankControllerTest {
 
         postTransaction(TRANSFERRED_MONEY_VALUE, client.getID().toString());
         postTransaction((TRANSFERRED_MONEY_VALUE * 2), client.getID().toString());
-
 
         assertEquals(TRANSFERRED_MONEY_VALUE, client.getListOfTransactions().get(0).getAmount());
         assertEquals((TRANSFERRED_MONEY_VALUE * 2), client.getListOfTransactions().get(1).getAmount());

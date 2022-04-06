@@ -210,13 +210,23 @@ ClientInfo() {
             <div className="column">
                 <form onSubmit={this.handleSubmitBalanceModify}>
                     <h3>
-                        <input type="number" min="1" max="2000000000" value={this.state.value1} onChange={this.handleChangeBalance} />
+                        <input type="number" min="1" value={this.state.value1} onChange={this.handleChangeBalance} />
+                        <select value={this.state.value} onChange={this.handleChange}>
+                            <option value="RUB">RUB</option>
+                            <option value="EUR">EUR</option>
+                            <option value="USD">USD</option>
+                        </select>
                     <input type="submit" value="Пополнить" />
                     </h3>
                 </form>
                 <form onSubmit={this.handleSubmitBalanceModify2}>
                     <h3>
-                        <input type="number" min="1" max="2000000000" value={this.state.value2} onChange={this.handleChangeBalance2} />
+                        <input type="number" min="1" value={this.state.value2} onChange={this.handleChangeBalance2} />
+                        <select value={this.state.value} onChange={this.handleChange}>
+                            <option value="RUB">RUB</option>
+                            <option value="EUR">EUR</option>
+                            <option value="USD">USD</option>
+                        </select>
                     <input type="submit" value="Списать" />
                     </h3>
                 </form>

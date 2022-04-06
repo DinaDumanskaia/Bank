@@ -1,4 +1,4 @@
-package bank.infrastructure.web.v1.dto;
+package bank.infrastructure.web;
 
 import bank.domain.Transaction;
 import com.fasterxml.jackson.annotation.JsonFormat;

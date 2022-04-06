@@ -1,11 +1,10 @@
-package bank.integration.controllerTestsV2;
+package bank.integration;
 
 import bank.application.BankService;
 import bank.domain.Client;
 import bank.domain.Currency;
 import bank.domain.Transaction;
-import bank.infrastructure.web.dto.TransactionDtoV2;
-import bank.infrastructure.web.v1.dto.MoneyDto;
+import bank.infrastructure.web.v2.MoneyDtoV2;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -22,8 +21,10 @@ import org.springframework.test.web.servlet.ResultMatcher;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -48,7 +49,6 @@ public class BankControllerTestV2 {
                 AssertionErrors.assertEquals("Status", HttpStatus.CREATED.value(),
                         result.getResponse().getStatus());
         String urlTemplate = "/bank/v2/clients/" + client.getID().toString() + "/transactions/";
-        //String moneyDto = objectMapper.writeValueAsString(moneyDTO);
         String moneyDto = "{\"amount\":\"" + TRANSFERRED_MONEY_VALUE + "\", \"currency\":\"EUR\"}";
 
         mvc.perform(
@@ -60,39 +60,25 @@ public class BankControllerTestV2 {
         Mockito.verify(bankService).changeBalance(client.getID(), Currency.EUR, TRANSFERRED_MONEY_VALUE);
     }
 
-    @Test
+//    @Test
     public void getEURTransactions() throws Exception {
         Client client = new Client();
-        Date date = new Date();
 
-        client.changeBalance(123, Currency.EUR, date);
+        Mockito.doAnswer(invocation -> {
+            UUID id = invocation.getArgument(0);
+            Integer value = invocation.getArgument(1);
 
-        ResultMatcher matcher = (result) ->
-                AssertionErrors.assertEquals("Status", HttpStatus.CREATED.value(),
-                        result.getResponse().getStatus());
+            assertEquals(client.getID(), id);
+            client.changeBalance(value, Currency.RUB, new Date());
+            return null;
+        }).when(bankService).changeBalance(any(UUID.class), any(Integer.class));
 
-        String moneyDto = "{\"amount\":\"" + TRANSFERRED_MONEY_VALUE + "\", \"currency\":\"EUR\"}";
+        postTransaction(TRANSFERRED_MONEY_VALUE, Currency.RUB, client.getID().toString());
+        postTransaction((TRANSFERRED_MONEY_VALUE * 2),Currency.RUB, client.getID().toString());
 
-        mvc.perform(
-                post("/bank/v2/clients/" + client.getID().toString() + "/transactions/")
-                        .content(moneyDto)
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(matcher);
-
-        List<Transaction> listOfTransactions = bankService.getTransactions(client.getID(), Currency.EUR);
-        System.out.println(listOfTransactions);
-
-//        String expected = "{\"amount\":\"" + TRANSFERRED_MONEY_VALUE + "\", \"date\":\"" + date + "\"}";
-//
-//        MvcResult getTransactions = mvc.perform(get("/bank/v1/clients/" + client.getID().toString() + "/transactions/"))
-//                .andExpect(status().isOk())
-//                .andExpect(content().json(expected))
-//                .andReturn();
-//
-
-
-
-        Mockito.when((bankService).getTransactions(client.getID(), Currency.EUR).size()).thenReturn(1);
+        List<Transaction> listOfTransactions = client.getMoneyAccounts().get(Currency.RUB).getMoneyAccountTransactionList();
+        assertEquals(TRANSFERRED_MONEY_VALUE, listOfTransactions.get(0).getAmount());
+        assertEquals((TRANSFERRED_MONEY_VALUE * 2), listOfTransactions.get(1).getAmount());
     }
 
     @Test
@@ -110,17 +96,17 @@ public class BankControllerTestV2 {
                 .andReturn();
     }
 
-    private void postTransaction(int money, String clientId) throws Exception {
-        postTransaction(money, clientId, HttpStatus.CREATED);
+    private void postTransaction(int money, Currency currency, String clientId) throws Exception {
+        postTransaction(money, currency, clientId, HttpStatus.CREATED);
     }
 
-    private void postTransaction(int money, String clientId, HttpStatus status) throws Exception {
+    private void postTransaction(int money, Currency currency, String clientId, HttpStatus status) throws Exception {
         ResultMatcher matcher = (result) ->
                 AssertionErrors.assertEquals("Status", status.value(),
                         result.getResponse().getStatus());
         mvc.perform(
                 post(transactionsUrl(clientId))
-                        .content(getMoneyDto(money))
+                        .content(getMoneyDto(money, currency))
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(matcher);
     }
@@ -129,9 +115,10 @@ public class BankControllerTestV2 {
         return "/bank/v2/clients/" + clientId + "/transactions/";
     }
 
-    private String getMoneyDto(int transaction) throws JsonProcessingException {
-        final MoneyDto moneyDTO = new MoneyDto();
+    private String getMoneyDto(int transaction, Currency currency) throws JsonProcessingException {
+        final MoneyDtoV2 moneyDTO = new MoneyDtoV2();
         moneyDTO.setAmount(transaction);
+        moneyDTO.setCurrency(currency);
         return objectMapper.writeValueAsString(moneyDTO);
     }
 }

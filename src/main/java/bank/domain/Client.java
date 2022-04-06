@@ -44,7 +44,11 @@ public class Client {
     }
 
     public List<Transaction> getListOfTransactions() {
-        return getMoneyAccount().getMoneyAccountTransactionList();
+        return getListOfTransactions(Currency.RUB);
+    }
+
+    public List<Transaction> getListOfTransactions(Currency currency) {
+        return getMoneyAccount(currency).getMoneyAccountTransactionList();
     }
 
     public int getBalance() {

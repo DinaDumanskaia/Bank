@@ -10,11 +10,9 @@ class MainPage extends React.Component {
     super(props);
     this.state = {
         value: '',
-        balance: null,
-        balanceEUR: null,
-        balanceUSD: null,
         clientId: null,
         buttonCreate: null,
+        accounts: {RUB:null, EUR:null, USD:null}
     };
 
     this.handleSubmitCreate = this.handleSubmitCreate.bind(this);
@@ -37,9 +35,7 @@ class MainPage extends React.Component {
         .then(data => this.setState({
                 buttonCreate: true,
                 clientId: data.id,
-                balance: 0,
-                balanceEUR: 0,
-                balanceUSD: 0,
+                accounts:{RUB:0, EUR:0, USD:0}
             }));
   }
 
@@ -57,9 +53,7 @@ class MainPage extends React.Component {
                 this.setState({
                         clientId: data.id,
                         buttonCreate: true,
-                        balance: data.accounts['RUB'],
-                        balanceEUR: data.accounts['EUR'],
-                        balanceUSD: data.accounts['USD'],
+                        accounts:data.accounts
                     });
                 return;
             }
@@ -99,7 +93,11 @@ class MainPage extends React.Component {
         return (
             <div>
                 {this.main()}
-                <ClientPage clientId={this.state.clientId} balance={this.state.balance} balanceEUR={this.state.balanceEUR} balanceUSD={this.state.balanceUSD} />
+                <ClientPage
+                    clientId={this.state.clientId}
+                    accounts={this.state.accounts}
+                    setAccounts={newAccount => this.setState({accounts:newAccount})}
+                    />
             </div>
         );
     }
@@ -120,27 +118,27 @@ class ClientPage extends React.Component {
         value1: '',
         value2: '',
         clientId : props.clientId,
-        balance : props.balance,
-        balanceEUR: props.balanceEUR,
-        balanceUSD: props.balanceUSD,
         buttonTransaction: false,
         value3 : '',
         transactionInfo: [],
         transactionAmounts: [],
-        transactionDates: []
+        transactionDates: [],
+        currency: "RUB",
+        transactionsJson: null
     };
 
     this.handleChangeBalance = this.handleChangeBalance.bind(this);
     this.handleChangeBalance2 = this.handleChangeBalance2.bind(this);
-    this.handleSubmitBalanceModify = this.handleSubmitBalanceModify.bind(this);
-    this.handleSubmitBalanceModify2 = this.handleSubmitBalanceModify2.bind(this);
+    this.increaseMoney = this.increaseMoney.bind(this);
+    this.decreaseMoney = this.decreaseMoney.bind(this);
+    this.handleSelectCurrency = this.handleSelectCurrency.bind(this);
 
     this.handleSubmitGetTransaction = this.handleSubmitGetTransaction.bind(this);
     this.printTransactions = this.printTransactions.bind(this);
   }
 
 
-    async handleSubmitBalanceModify(event) {
+    async increaseMoney(event) {
         event.preventDefault();
         if (!this.state.value1) {
             return;
@@ -148,23 +146,24 @@ class ClientPage extends React.Component {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ amount: this.state.value1 })
+            body: JSON.stringify({ amount: this.state.value1, currency: this.state.currency })
         };
 
-        const response = await fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId + '/transactions/', requestOptions);
+        const response = await fetch('http://localhost:8080/bank/v2/clients/' + this.props.clientId + '/transactions/', requestOptions);
         if (!response.ok) {
             await showError(response);
             return;
         }
 
         this.setState({ value1: '' });
-        const balanceResponse = await fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId);
+        const balanceResponse = await fetch('http://localhost:8080/bank/v2/clients/' + this.props.clientId);
         const data = await balanceResponse.json();
 
-        this.setState({ clientId: data.id, balance: data.balance });
+        this.setState({ clientId: data.id, transactionAmounts: null, transactionDates: null, transactionInfo: null, transactionsJson: null});
+        this.props.setAccounts(data.accounts);
     }
 
-    async handleSubmitBalanceModify2(event) {
+    async decreaseMoney(event) {
         event.preventDefault();
         if (!this.state.value2) {
             return;
@@ -172,20 +171,21 @@ class ClientPage extends React.Component {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ amount: this.state.value2 * (-1) })
+            body: JSON.stringify({ amount: this.state.value2 * (-1), currency: this.state.currency })
         };
 
-        const response = await fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId + '/transactions/', requestOptions);
+        const response = await fetch('http://localhost:8080/bank/v2/clients/' + this.props.clientId + '/transactions/', requestOptions);
         if (!response.ok) {
             await showError(response);
             return;
         }
 
         this.setState({ value2: '' });
-        const balanceResponse = await fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId);
+        const balanceResponse = await fetch('http://localhost:8080/bank/v2/clients/' + this.props.clientId);
         const data = await balanceResponse.json();
 
-        this.setState({ clientId: data.id, balance: data.balance });
+        this.setState({ clientId: data.id, transactionAmounts: null, transactionDates: null, transactionInfo: null, transactionsJson: null});
+        this.props.setAccounts(data.accounts);
     }
 
     async handleChangeBalance(event) {
@@ -196,18 +196,33 @@ class ClientPage extends React.Component {
         this.setState({value2: event.target.value});
     }
 
+    parseTransactions(data, currency) {
+        const amounts = data.map(transactionAmount => transactionAmount.amount);
+        const dates = data.map(transactionDate => transactionDate.date);
+        const combined = data.map(element => `${element.amount} ${currency} ${element.date}`);
+        return {amounts, dates, combined};
+    }
+
+    handleSelectCurrency(event) {
+        const currency = event.target.value;
+        if (this.state.transactionsJson) {
+            const {amounts, dates, combined} = this.parseTransactions(this.state.transactionsJson[currency], currency);
+            this.setState({currency, transactionAmounts: amounts, transactionDates: dates, transactionInfo: combined});
+        } else {
+            this.setState({currency});
+        }
+    }
+
     async handleSubmitGetTransaction(event) {
         event.preventDefault();
         this.setState({buttonTransaction: true});
-        const response = await fetch('http://localhost:8080/bank/v1/clients/' + this.props.clientId + '/transactions/');
-        const data = await response.json();
-        const amounts = data.map(transactionAmount => transactionAmount.amount);
-        const dates = data.map(transactionDate => transactionDate.date);
-        const combined = data.map(element => element.amount + ' RUB at ' + element.date);
+        const response = await fetch('http://localhost:8080/bank/v2/clients/' + this.props.clientId + '/transactions/');
+        const dataJson = await response.json();
+        const data = dataJson[this.state.currency]
+        const {amounts, dates, combined} = this.parseTransactions(data, this.state.currency);
 
-        this.setState({transactionAmounts: amounts});
-        this.setState({transactionDates: dates});
-        this.setState({transactionInfo: combined});
+        this.setState({transactionAmounts: amounts, transactionDates: dates, transactionInfo: combined, transactionsJson: dataJson});
+
     }
 
     handleChangeId(event) {
@@ -221,32 +236,27 @@ ClientInfo() {
             <div className="column">
                 <h2>Клиент</h2>
                 <h3>ИД: {this.state.clientId}</h3>
-                <h3>Баланс: {this.state.balance}</h3>
-                <h3>Баланс RUB: {this.state.balance}</h3>
-                <h3>Баланс EUR: {this.state.balanceEUR}</h3>
-                <h3>Баланс USD: {this.state.balanceUSD}</h3>
+                {Object.keys(this.props.accounts)
+                    .map(currency => this.props.accounts[currency] !== null
+                    &&<h3>Баланс {currency}: {this.props.accounts[currency]}</h3>)} 
+
             </div>
             <div className="column">
-                <form onSubmit={this.handleSubmitBalanceModify}>
+                <form onSubmit={this.increaseMoney}>
+                <select value={this.state.currency} onChange={this.handleSelectCurrency}>
+                    <option value="RUB">RUB</option>
+                    <option value="EUR">EUR</option>
+                    <option value="USD">USD</option>
+                </select>
                     <h3>
-                        <input type="number" min="1" value={this.state.value1} onChange={this.handleChangeBalance} />
-                        <select value={this.state.value} onChange={this.handleChange}>
-                            <option value="RUB">RUB</option>
-                            <option value="EUR">EUR</option>
-                            <option value="USD">USD</option>
-                        </select>
+                    <input type="number" min="1" value={this.state.value1} onChange={this.handleChangeBalance} />
                     <input type="submit" value="Пополнить" />
                     </h3>
                 </form>
-                <form onSubmit={this.handleSubmitBalanceModify2}>
+                <form onSubmit={this.decreaseMoney}>
                     <h3>
                         <input type="number" min="1" value={this.state.value2} onChange={this.handleChangeBalance2} />
-                        <select value={this.state.value} onChange={this.handleChange}>
-                            <option value="RUB">RUB</option>
-                            <option value="EUR">EUR</option>
-                            <option value="USD">USD</option>
-                        </select>
-                    <input type="submit" value="Списать" />
+                        <input type="submit" value="Списать" />
                     </h3>
                 </form>
                 <form onSubmit={this.handleSubmitGetTransaction}>
@@ -265,7 +275,7 @@ ClientInfo() {
         return (
                 <div>
                     <ul>
-                        {this.state.transactionInfo.map(item => {
+                        {this.state.transactionInfo?.map(item => {
                             return <li>{item}</li>;
                         })}
                     </ul>
@@ -282,10 +292,10 @@ ClientInfo() {
                     <div>
                         {this.ClientInfo()}
                     </div>
-                    <div className="transactions">
-                    {this.state.transactionAmounts.length ? 'Транзакции:' : 'Транзакций нет'}
+                    {this.state.transactionsJson && (<div className="transactions">
+                    {this.state.transactionAmounts?.length ? 'Транзакции:' : 'Транзакций нет'}
                     {this.printTransactions()}
-                    </div>
+                    </div>)}
                 </div>
             );
         }

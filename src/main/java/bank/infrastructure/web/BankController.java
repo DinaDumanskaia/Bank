@@ -91,8 +91,6 @@ public class BankController {
             throw new IllegalClientIdException("INCORRECT ID");
         }
 
-        Currency currency = transaction.getCurrency();
-        int amount = transaction.getAmount();
         bankService.changeBalance(clientId, transaction.getCurrency(), transaction.getAmount());
 
         return new ResponseEntity<>(HttpStatus.CREATED);

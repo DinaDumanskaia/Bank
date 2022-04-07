@@ -5,7 +5,7 @@ import bank.application.exceptions.ClientNotFoundException;
 import bank.application.exceptions.IllegalClientIdException;
 import bank.domain.Client;
 import bank.domain.Currency;
-import bank.infrastructure.database.MultiCurrencyRealClientRepository;
+import bank.infrastructure.database.RealClientRepository;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -15,7 +15,7 @@ import java.util.UUID;
 
 
 public class RepositoryTest {
-    ClientRepository repository = new MultiCurrencyRealClientRepository();
+    ClientRepository repository = new RealClientRepository();
 
     public RepositoryTest() throws SQLException {
     }

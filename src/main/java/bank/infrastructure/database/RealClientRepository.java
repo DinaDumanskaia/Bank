@@ -9,20 +9,19 @@ import bank.domain.Currency;
 import bank.domain.MoneyAccount;
 import bank.domain.Transaction;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
 import java.sql.*;
 import java.util.Date;
 import java.util.*;
 
 @Repository
-public class MultiCurrencyRealClientRepository implements ClientRepository {
+public class RealClientRepository implements ClientRepository {
     private final String DB_URL = "jdbc:h2:tcp://localhost/~/test";
     private final Connection connection;
     private final Statement statement;
     PreparedStatement preparedStatement;
 
-    public MultiCurrencyRealClientRepository() throws SQLException {
+    public RealClientRepository() throws SQLException {
         this.connection = DriverManager.getConnection(DB_URL, "sa", "password");
         statement = connection.createStatement();
     }
